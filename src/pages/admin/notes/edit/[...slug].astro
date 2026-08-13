@@ -1,0 +1,723 @@
+---
+import { getCollection } from "astro:content";
+import { getSupabaseConfig } from "../../../../lib/supabase";
+import { getGitHubConfig, fetchFileFromGitHub } from "../../../../lib/github";
+
+const { slug } = Astro.params;
+const config = getSupabaseConfig();
+const githubConfig = getGitHubConfig();
+
+// Load note from collection
+const notes = await getCollection("php");
+const currentNote = notes.find((n) => n.id === slug || n.id === `${slug}.md`);
+
+let initialTitle = currentNote?.data.title || "";
+let initialDescription = currentNote?.data.description || "";
+let initialSubject = currentNote?.data.subject || "PHP";
+let initialChapter = currentNote?.data.chapter || "";
+let initialAuthor = currentNote?.data.author || "Fahad Sir";
+let initialBody = currentNote?.body || "";
+let fileSha = "";
+
+// Attempt to fetch raw file and SHA from GitHub API if configured
+if (githubConfig.isConfigured && slug) {
+  try {
+    const filename = slug.endsWith(".md") ? slug : `${slug}.md`;
+    const targetSubject = initialSubject.toLowerCase();
+    const filePath = `src/content/${targetSubject}/${filename}`;
+    const gitFileData = await fetchFileFromGitHub(filePath);
+
+    if (gitFileData.exists) {
+      fileSha = gitFileData.sha || "";
+      if (gitFileData.content) {
+        // Strip YAML frontmatter from raw content for editor body
+        const frontmatterRegex = /^---[\s\S]*?---\n/;
+        initialBody = gitFileData.content.replace(frontmatterRegex, "").trim();
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch file SHA from GitHub server side:", err);
+  }
+}
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Edit Note: {initialTitle || slug} | Fahad Sir Admin</title>
+		<meta name="robots" content="noindex, nofollow" />
+	</head>
+	<body>
+		<!-- AUTH GUARD OVERLAY -->
+		<div id="authGuardOverlay" class="auth-guard-overlay">
+			<div class="auth-loader-card">
+				<div class="spinner"></div>
+				<p>Verifying Admin Security Credentials...</p>
+			</div>
+		</div>
+
+		<!-- MAIN APP -->
+		<div id="adminApp" class="admin-app hidden">
+			<header class="navbar">
+				<div class="brand-group">
+					<a href="/admin" class="logo">
+						Notes By <span>FSir</span>
+					</a>
+					<span class="admin-badge">⚡ Admin Portal / Edit Note</span>
+				</div>
+
+				<div class="nav-actions">
+					<span class="admin-user-pill" id="adminUserPill">
+						👤 Admin
+					</span>
+
+					<button
+						id="themeToggle"
+						class="theme-btn"
+						aria-label="Toggle dark mode"
+					>
+						🌙
+					</button>
+
+					<a href="/admin" class="back-btn">
+						← Back to Dashboard
+					</a>
+				</div>
+			</header>
+
+			<main class="editor-container">
+				<div class="editor-header">
+					<div>
+						<h1>Edit Note</h1>
+						<p>Modifying <code>src/content/{initialSubject.toLowerCase()}/{slug}.md</code></p>
+					</div>
+
+					<div class="header-actions">
+						<button id="deleteNoteBtn" class="danger-btn">
+							🗑️ Delete Note
+						</button>
+						<a href="/admin" class="secondary-btn">Cancel</a>
+						<button id="saveNoteBtn" class="primary-btn">
+							<span>💾 Save Changes to GitHub</span>
+						</button>
+					</div>
+				</div>
+
+				{
+					!githubConfig.isConfigured && (
+						<div class="alert warning">
+							<strong>⚙️ GitHub Integration Missing:</strong>
+							<p>
+								To save changes to your GitHub repository, set <code>GITHUB_TOKEN</code>, <code>GITHUB_OWNER</code>, and <code>GITHUB_REPO</code> in your <code>.env.local</code> file or Vercel Environment Variables.
+							</p>
+						</div>
+					)
+				}
+
+				<div id="statusAlert" class="alert hidden"></div>
+
+				<form id="editNoteForm" class="note-form">
+					<input type="hidden" id="fileSha" value={fileSha} />
+					<input type="hidden" id="noteSlug" value={slug} />
+
+					<div class="meta-grid">
+						<div class="form-group">
+							<label for="title">Note Title</label>
+							<input
+								type="text"
+								id="title"
+								name="title"
+								value={initialTitle}
+								required
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="chapter">Chapter Number / ID</label>
+							<input
+								type="text"
+								id="chapter"
+								name="chapter"
+								value={initialChapter}
+								required
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="subject">Subject</label>
+							<select id="subject" name="subject" required>
+								<option value="PHP" selected={initialSubject === "PHP"}>PHP</option>
+								<option value="C" selected={initialSubject === "C"}>C</option>
+								<option value="C++" selected={initialSubject === "C++"}>C++</option>
+								<option value="Python" selected={initialSubject === "Python"}>Python</option>
+								<option value="MySQL" selected={initialSubject === "MySQL"}>MySQL</option>
+								<option value="DSA" selected={initialSubject === "DSA"}>DSA</option>
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="author">Author Name</label>
+							<input
+								type="text"
+								id="author"
+								name="author"
+								value={initialAuthor}
+								required
+							/>
+						</div>
+
+						<div class="form-group full-width">
+							<label for="description">Short Description</label>
+							<input
+								type="text"
+								id="description"
+								name="description"
+								value={initialDescription}
+								required
+							/>
+						</div>
+
+						<div class="form-group full-width">
+							<label for="filename">Markdown Filename</label>
+							<input
+								type="text"
+								id="filename"
+								name="filename"
+								value={slug?.endsWith(".md") ? slug : `${slug}.md`}
+								readonly
+							/>
+						</div>
+					</div>
+
+					<!-- SPLIT EDITOR / PREVIEW -->
+					<div class="editor-split">
+						<div class="editor-pane">
+							<div class="pane-header">
+								<span>📝 Markdown Editor</span>
+							</div>
+							<textarea
+								id="markdownContent"
+								name="content"
+								required
+							>{initialBody}</textarea>
+						</div>
+
+						<div class="preview-pane">
+							<div class="pane-header">
+								<span>👁️ Live Preview</span>
+							</div>
+							<div id="markdownPreview" class="preview-content"></div>
+						</div>
+					</div>
+				</form>
+			</main>
+		</div>
+
+		<!-- CLIENT SCRIPT -->
+		<script is:inline define:vars={{ supabaseUrl: config.url, supabaseKey: config.anonKey, isConfigured: config.isConfigured }}>
+			// Theme Toggle
+			const themeButton = document.getElementById("themeToggle");
+			const savedTheme = localStorage.getItem("theme");
+
+			if (savedTheme === "dark") {
+				document.body.classList.add("dark");
+				if (themeButton) themeButton.textContent = "☀️";
+			}
+
+			themeButton?.addEventListener("click", () => {
+				document.body.classList.toggle("dark");
+				const isDark = document.body.classList.contains("dark");
+				localStorage.setItem("theme", isDark ? "dark" : "light");
+				themeButton.textContent = isDark ? "☀️" : "🌙";
+			});
+
+			let supabase = null;
+			let sessionToken = null;
+
+			// Auth Guard
+			async function initAuth() {
+				const overlay = document.getElementById("authGuardOverlay");
+				const app = document.getElementById("adminApp");
+
+				if (!isConfigured || !supabaseUrl || !supabaseKey) {
+					window.location.href = "/login";
+					return;
+				}
+
+				try {
+					const mod = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
+					supabase = mod.createClient(supabaseUrl, supabaseKey);
+
+					const { data: { session } } = await supabase.auth.getSession();
+					if (!session) {
+						window.location.href = "/login";
+						return;
+					}
+
+					sessionToken = session.access_token;
+
+					const { data: profile } = await supabase
+						.from("profiles")
+						.select("role, email")
+						.eq("id", session.user.id)
+						.single();
+
+					if (!profile || profile.role !== "admin") {
+						alert("Unauthorized: Admin access required.");
+						window.location.href = "/login";
+						return;
+					}
+
+					const adminPill = document.getElementById("adminUserPill");
+					if (adminPill) adminPill.textContent = `👤 ${profile.email || session.user.email}`;
+
+					overlay?.classList.add("hidden");
+					app?.classList.remove("hidden");
+
+					renderPreview();
+
+				} catch (err) {
+					console.error("Auth initialization error:", err);
+					window.location.href = "/login";
+				}
+			}
+
+			initAuth();
+
+			// Live Markdown Preview
+			const markdownInput = document.getElementById("markdownContent");
+			const markdownPreview = document.getElementById("markdownPreview");
+
+			function renderPreview() {
+				if (!markdownPreview || !markdownInput) return;
+				const text = markdownInput.value;
+				if (!text.trim()) {
+					markdownPreview.innerHTML = '<p class="text-muted">Empty preview...</p>';
+					return;
+				}
+
+				let html = text
+					.replace(/^### (.*$)/gim, '<h3>$1</h3>')
+					.replace(/^## (.*$)/gim, '<h2>$1</h2>')
+					.replace(/^# (.*$)/gim, '<h1>$1</h1>')
+					.replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+					.replace(/\*(.*)\*/gim, '<em>$1</em>')
+					.replace(/`([^`]+)`/gim, '<code>$1</code>')
+					.replace(/```([a-z]*)\n([\s\S]*?)\n```/gim, '<pre><code>$2</code></pre>')
+					.replace(/^\* (.*$)/gim, '<li>$1</li>')
+					.replace(/\n\n/gim, '<br/><br/>');
+
+				markdownPreview.innerHTML = html;
+			}
+
+			markdownInput?.addEventListener("input", renderPreview);
+
+			// Save Note Handler
+			const saveNoteBtn = document.getElementById("saveNoteBtn");
+			const statusAlert = document.getElementById("statusAlert");
+
+			saveNoteBtn?.addEventListener("click", async (e) => {
+				e.preventDefault();
+
+				const title = document.getElementById("title").value.trim();
+				const chapter = document.getElementById("chapter").value.trim();
+				const subject = document.getElementById("subject").value;
+				const author = document.getElementById("author").value.trim();
+				const description = document.getElementById("description").value.trim();
+				const filename = document.getElementById("filename").value.trim();
+				const body = document.getElementById("markdownContent").value;
+				const sha = document.getElementById("fileSha").value;
+
+				if (!title || !chapter || !filename || !description) {
+					alert("Please fill in all required fields.");
+					return;
+				}
+
+				if (saveNoteBtn) saveNoteBtn.disabled = true;
+				statusAlert?.classList.add("hidden");
+
+				try {
+					const res = await fetch("/api/notes/save", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${sessionToken}`,
+						},
+						body: JSON.stringify({
+							filename,
+							title,
+							description,
+							subject,
+							chapter,
+							author,
+							body,
+							sha: sha || undefined,
+						}),
+					});
+
+					const data = await res.json();
+
+					if (!res.ok) {
+						throw new Error(data.error || "Failed to update note.");
+					}
+
+					if (statusAlert) {
+						statusAlert.className = "alert success";
+						statusAlert.innerHTML = `
+							<strong>🎉 Changes Saved Successfully!</strong>
+							<p>${data.message}</p>
+						`;
+						statusAlert.classList.remove("hidden");
+					}
+
+					setTimeout(() => {
+						window.location.href = "/admin";
+					}, 2500);
+
+				} catch (err) {
+					if (statusAlert) {
+						statusAlert.className = "alert danger";
+						statusAlert.innerHTML = `<strong>Error:</strong> ${err.message}`;
+						statusAlert.classList.remove("hidden");
+					}
+				} finally {
+					if (saveNoteBtn) saveNoteBtn.disabled = false;
+				}
+			});
+
+			// Delete Note Handler
+			const deleteNoteBtn = document.getElementById("deleteNoteBtn");
+
+			deleteNoteBtn?.addEventListener("click", async () => {
+				const filename = document.getElementById("filename").value.trim();
+				const subject = document.getElementById("subject").value;
+				const title = document.getElementById("title").value;
+
+				if (!confirm(`Are you sure you want to permanently delete the note "${title}" (${filename}) from GitHub? This action cannot be undone.`)) {
+					return;
+				}
+
+				try {
+					const res = await fetch("/api/notes/delete", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"Authorization": `Bearer ${sessionToken}`,
+						},
+						body: JSON.stringify({
+							filename,
+							subject,
+						}),
+					});
+
+					const data = await res.json();
+
+					if (!res.ok) {
+						throw new Error(data.error || "Failed to delete note.");
+					}
+
+					alert(`Note "${title}" deleted successfully from GitHub repository.`);
+					window.location.href = "/admin";
+
+				} catch (err) {
+					alert("Delete error: " + err.message);
+				}
+			});
+		</script>
+
+		<!-- STYLES -->
+		<style>
+			:global(*) {
+				box-sizing: border-box;
+				margin: 0;
+				padding: 0;
+			}
+
+			:global(body) {
+				font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+				color: #172033;
+				background: #f7f9fc;
+				transition: background 0.25s ease, color 0.25s ease;
+				min-height: 100vh;
+			}
+
+			.hidden { display: none !important; }
+
+			.auth-guard-overlay {
+				position: fixed;
+				inset: 0;
+				background: #ffffff;
+				z-index: 999;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.auth-loader-card {
+				text-align: center;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 16px;
+			}
+
+			.spinner {
+				width: 44px;
+				height: 44px;
+				border: 4px solid #e0e4f0;
+				border-top-color: #5b4bdb;
+				border-radius: 50%;
+				animation: spin 0.8s linear infinite;
+			}
+
+			@keyframes spin { to { transform: rotate(360deg); } }
+
+			.navbar {
+				height: 70px;
+				padding: 0 4%;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				border-bottom: 1px solid #e9ebf1;
+				background: #ffffff;
+				position: sticky;
+				top: 0;
+				z-index: 100;
+			}
+
+			.brand-group {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+
+			.logo {
+				color: #172033;
+				text-decoration: none;
+				font-size: 22px;
+				font-weight: 800;
+			}
+
+			.logo span { color: #5b4bdb; }
+
+			.admin-badge {
+				background: #f2efff;
+				border: 1px solid #e6e2ff;
+				color: #5b4bdb;
+				padding: 4px 10px;
+				border-radius: 20px;
+				font-size: 12px;
+				font-weight: 700;
+			}
+
+			.nav-actions {
+				display: flex;
+				align-items: center;
+				gap: 14px;
+			}
+
+			.admin-user-pill {
+				font-size: 14px;
+				font-weight: 600;
+				color: #4b5563;
+				background: #f3f4f6;
+				padding: 6px 12px;
+				border-radius: 8px;
+			}
+
+			.theme-btn, .back-btn, .secondary-btn, .danger-btn {
+				border: 1px solid #dddff0;
+				background: white;
+				cursor: pointer;
+				font-weight: 600;
+				font-size: 14px;
+				color: #172033;
+				border-radius: 8px;
+				text-decoration: none;
+			}
+
+			.theme-btn {
+				width: 38px;
+				height: 38px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.back-btn, .secondary-btn { padding: 8px 16px; }
+
+			.danger-btn {
+				padding: 8px 16px;
+				background: #fef2f2;
+				border-color: #fca5a5;
+				color: #dc2626;
+			}
+
+			.editor-container {
+				max-width: 1300px;
+				margin: 30px auto;
+				padding: 0 20px 60px;
+			}
+
+			.editor-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 24px;
+			}
+
+			.editor-header h1 {
+				font-size: 26px;
+				font-weight: 800;
+				color: #172033;
+			}
+
+			.editor-header p {
+				color: #6b7280;
+				font-size: 14px;
+			}
+
+			.header-actions {
+				display: flex;
+				gap: 12px;
+			}
+
+			.primary-btn {
+				background: #5b4bdb;
+				color: white;
+				padding: 10px 20px;
+				border-radius: 10px;
+				border: none;
+				font-size: 15px;
+				font-weight: 700;
+				cursor: pointer;
+			}
+
+			.primary-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+			.alert {
+				padding: 16px 20px;
+				border-radius: 12px;
+				font-size: 14px;
+				margin-bottom: 24px;
+				line-height: 1.5;
+			}
+
+			.alert.warning { background: #fff8e6; border: 1px solid #ffe8b3; color: #8a6d3b; }
+			.alert.danger { background: #fdf2f2; border: 1px solid #f8b4b4; color: #9b1c1c; }
+			.alert.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+			.alert code { background: rgba(0,0,0,0.06); padding: 2px 6px; border-radius: 4px; }
+
+			.note-form {
+				display: flex;
+				flex-direction: column;
+				gap: 24px;
+			}
+
+			.meta-grid {
+				display: grid;
+				grid-template-columns: repeat(4, 1fr);
+				gap: 20px;
+				background: #ffffff;
+				border: 1px solid #e5e7eb;
+				border-radius: 16px;
+				padding: 24px;
+			}
+
+			.form-group {
+				display: flex;
+				flex-direction: column;
+				gap: 6px;
+			}
+
+			.form-group.full-width { grid-column: span 2; }
+
+			.form-group label {
+				font-size: 13px;
+				font-weight: 700;
+				color: #374151;
+			}
+
+			.form-group input, .form-group select {
+				padding: 10px 14px;
+				border-radius: 8px;
+				border: 1px solid #d1d5db;
+				font-size: 14px;
+				outline: none;
+			}
+
+			.editor-split {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				gap: 20px;
+				min-height: 500px;
+			}
+
+			.editor-pane, .preview-pane {
+				background: #ffffff;
+				border: 1px solid #e5e7eb;
+				border-radius: 16px;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			.pane-header {
+				padding: 12px 18px;
+				background: #f9fafb;
+				border-bottom: 1px solid #e5e7eb;
+				font-size: 13px;
+				font-weight: 700;
+				color: #374151;
+			}
+
+			#markdownContent {
+				flex: 1;
+				padding: 20px;
+				border: none;
+				outline: none;
+				font-family: monospace, monospace;
+				font-size: 14px;
+				line-height: 1.6;
+				resize: vertical;
+				min-height: 450px;
+			}
+
+			.preview-content {
+				flex: 1;
+				padding: 20px;
+				overflow-y: auto;
+				font-size: 15px;
+				line-height: 1.7;
+			}
+
+			.preview-content h1 { font-size: 26px; margin-bottom: 12px; }
+			.preview-content h2 { font-size: 22px; margin: 16px 0 10px; }
+			.preview-content h3 { font-size: 18px; margin: 14px 0 8px; }
+			.preview-content code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+			.preview-content pre { background: #1e1e1e; color: #d4d4d4; padding: 14px; border-radius: 8px; overflow-x: auto; }
+
+			.text-muted { color: #9ca3af; font-style: italic; }
+
+			/* DARK MODE */
+			body.dark { color: #e8eaf0; background: #101116; }
+			body.dark .auth-guard-overlay { background: #101116; color: #e8eaf0; }
+			body.dark .navbar { background: #17181e; border-color: #282a33; }
+			body.dark .logo { color: #f0f1f5; }
+			body.dark .editor-header h1 { color: #f0f1f5; }
+			body.dark .meta-grid, body.dark .editor-pane, body.dark .preview-pane { background: #17181e; border-color: #282a33; }
+			body.dark .pane-header { background: #20222a; border-color: #282a33; color: #d1d5db; }
+			body.dark .form-group label { color: #e8eaf0; }
+			body.dark .form-group input, body.dark .form-group select, body.dark #markdownContent { background: #101116; border-color: #374151; color: #e8eaf0; }
+			body.dark .secondary-btn { background: #20222a; border-color: #374151; color: #e8eaf0; }
+
+			@media (max-width: 900px) {
+				.meta-grid { grid-template-columns: 1fr 1fr; }
+				.form-group.full-width { grid-column: span 2; }
+				.editor-split { grid-template-columns: 1fr; }
+			}
+		</style>
+	</body>
+</html>

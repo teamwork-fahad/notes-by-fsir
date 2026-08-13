@@ -1,5 +1,8 @@
 ---
 import { getCollection, render } from "astro:content";
+import { getSupabaseConfig } from "../../lib/supabase";
+
+const config = getSupabaseConfig();
 
 export async function getStaticPaths() {
     const posts = await getCollection("php");
@@ -57,6 +60,7 @@ const tocItems = headings.filter(
                     🌙
                 </button>
 
+                <a href="/login" class="back-btn"> Login </a>
                 <a href="/" class="back-btn"> ← Home </a>
             </div>
         </header>
@@ -166,8 +170,36 @@ const tocItems = headings.filter(
                                 ))
                             }
                         </nav>
+
+                        <!-- STUDENT SUGGESTION CARD -->
+                        <div class="suggestion-card">
+                            <h4>💡 Have a suggestion?</h4>
+                            <p>Help Fahad Sir improve this note!</p>
+                            <button id="openSuggestBtn" class="suggest-btn">Suggest Edit</button>
+                        </div>
                     </div>
                 </aside>
+
+                <!-- SUGGESTION MODAL -->
+                <div id="suggestModal" class="suggest-modal-backdrop hidden">
+                    <div class="suggest-modal-card">
+                        <div class="modal-header">
+                            <h3>💡 Suggest Edit for Note</h3>
+                            <button id="closeSuggestModalBtn" class="close-btn">&times;</button>
+                        </div>
+                        <form id="suggestForm">
+                            <input type="hidden" id="suggestNoteId" value={post.id} />
+                            <div class="form-group">
+                                <label for="suggestionText">Your Suggestion / Feedback</label>
+                                <textarea id="suggestionText" rows="4" placeholder="Explain what could be improved or corrected in this note..." required></textarea>
+                            </div>
+                            <div class="modal-actions">
+                                <button type="button" id="cancelSuggestBtn" class="secondary-btn">Cancel</button>
+                                <button type="submit" id="submitSuggestBtn" class="primary-btn">Submit Suggestion</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -185,7 +217,7 @@ const tocItems = headings.filter(
 
         <!-- JAVASCRIPT -->
 
-        <script>
+        <script is:inline define:vars={{ supabaseUrl: config.url, supabaseKey: config.anonKey, isConfigured: config.isConfigured }}>
             // =====================================
             // DARK MODE
             // =====================================
@@ -366,6 +398,56 @@ const tocItems = headings.filter(
                     }
                 });
             });
+
+            // STUDENT SUGGESTION HANDLER
+            // =====================================
+            let supabase = null;
+
+            if (isConfigured && supabaseUrl && supabaseKey) {
+                import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm")
+                    .then((mod) => {
+                        supabase = mod.createClient(supabaseUrl, supabaseKey);
+                    })
+                    .catch((err) => console.warn("Supabase init note:", err));
+            }
+
+            const suggestModal = document.getElementById("suggestModal");
+            const openSuggestBtn = document.getElementById("openSuggestBtn");
+            const closeSuggestModalBtn = document.getElementById("closeSuggestModalBtn");
+            const cancelSuggestBtn = document.getElementById("cancelSuggestBtn");
+            const suggestForm = document.getElementById("suggestForm");
+
+            openSuggestBtn?.addEventListener("click", () => suggestModal?.classList.remove("hidden"));
+            closeSuggestModalBtn?.addEventListener("click", () => suggestModal?.classList.add("hidden"));
+            cancelSuggestBtn?.addEventListener("click", () => suggestModal?.classList.add("hidden"));
+
+            suggestForm?.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const noteId = document.getElementById("suggestNoteId").value;
+                const suggestion = document.getElementById("suggestionText").value.trim();
+
+                if (!suggestion) return;
+
+                try {
+                    if (supabase) {
+                        const { data: { session } } = await supabase.auth.getSession();
+                        const { error } = await supabase.from("suggestions").insert({
+                            note_id: noteId,
+                            suggestion: suggestion,
+                            user_id: session?.user?.id || null
+                        });
+
+                        if (error) throw error;
+                        alert("Thank you! Your suggestion has been submitted to Fahad Sir for review.");
+                    } else {
+                        alert("Suggestion received! (To connect live DB storage, add Supabase keys to .env.local).");
+                    }
+                    suggestForm.reset();
+                    suggestModal?.classList.add("hidden");
+                } catch (err) {
+                    alert("Error submitting suggestion: " + err.message);
+                }
+            });
         </script>
     </body>
 </html>
@@ -404,6 +486,10 @@ const tocItems = headings.filter(
             color 0.25s ease;
 
         overflow-x: hidden;
+    }
+
+    .hidden {
+        display: none !important;
     }
 
     /* =========================================
@@ -563,10 +649,7 @@ const tocItems = headings.filter(
         align-items: start;
     }
 
-    /* =========================================
-     ARTICLE
-  ========================================= */
-
+    /* ARTICLE */
     .article {
         min-width: 0;
 
@@ -641,10 +724,7 @@ const tocItems = headings.filter(
         line-height: 1.7;
     }
 
-    /* =========================================
-     READING PROGRESS
-  ========================================= */
-
+    /* READING PROGRESS */
     .reading-progress {
         height: 3px;
 
@@ -661,10 +741,7 @@ const tocItems = headings.filter(
         transition: width 0.08s linear;
     }
 
-    /* =========================================
-     CONTENT
-  ========================================= */
-
+    /* CONTENT */
     .content {
         padding: 15px 60px 60px;
 
@@ -726,7 +803,6 @@ const tocItems = headings.filter(
     }
 
     /* INLINE CODE */
-
     .content :global(code) {
         padding: 3px 7px;
 
@@ -740,7 +816,6 @@ const tocItems = headings.filter(
     }
 
     /* CODE BLOCK */
-
     .content :global(pre) {
         margin: 25px 0;
 
@@ -852,7 +927,6 @@ const tocItems = headings.filter(
     }
 
     /* TABLE */
-
     .content :global(table) {
         width: 100%;
 
@@ -883,7 +957,6 @@ const tocItems = headings.filter(
     }
 
     /* BLOCKQUOTE */
-
     .content :global(blockquote) {
         margin: 25px 0;
 
@@ -909,10 +982,7 @@ const tocItems = headings.filter(
         color: #4f586b;
     }
 
-    /* =========================================
-     TOC
-  ========================================= */
-
+    /* TOC */
     .toc-container {
         position: sticky;
 
@@ -1021,7 +1091,7 @@ const tocItems = headings.filter(
 
         gap: 2px;
 
-        max-height: calc(100vh - 190px);
+        max-height: calc(100vh - 300px);
 
         overflow-y: auto;
 
@@ -1105,10 +1175,129 @@ const tocItems = headings.filter(
         padding-left: 25px;
     }
 
-    /* =========================================
-     END NOTE
-  ========================================= */
+    /* STUDENT SUGGESTION STYLES */
+    .suggestion-card {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid #eceef3;
+    }
 
+    .suggestion-card h4 {
+        font-size: 13px;
+        font-weight: 700;
+        color: #202534;
+        margin-bottom: 4px;
+    }
+
+    .suggestion-card p {
+        font-size: 12px;
+        color: #737b8d;
+        margin-bottom: 10px;
+    }
+
+    .suggest-btn {
+        width: 100%;
+        padding: 8px;
+        background: #f0edff;
+        color: #5b4bdb;
+        border: 1px solid #dcd5ff;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .suggest-btn:hover {
+        background: #5b4bdb;
+        color: white;
+    }
+
+    .suggest-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .suggest-modal-card {
+        background: white;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 500px;
+        padding: 24px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+    }
+
+    #suggestForm {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .form-group textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        font-family: inherit;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .primary-btn {
+        background: #5b4bdb;
+        color: white;
+        padding: 9px 16px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .secondary-btn {
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        padding: 9px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    /* END NOTE */
     .end-note {
         margin: 20px 60px 60px;
 
@@ -1155,10 +1344,7 @@ const tocItems = headings.filter(
         font-size: 13px;
     }
 
-    /* =========================================
-     FOOTER
-  ========================================= */
-
+    /* FOOTER */
     footer {
         padding: 45px 20px;
 
@@ -1187,10 +1373,7 @@ const tocItems = headings.filter(
         margin-top: 8px;
     }
 
-    /* =========================================
-     DARK MODE
-  ========================================= */
-
+    /* DARK MODE */
     body.dark {
         background: #101116;
 
@@ -1229,23 +1412,27 @@ const tocItems = headings.filter(
     body.dark .article h1,
     body.dark .content :global(h2),
     body.dark .content :global(h3),
-    body.dark .content :global(strong) {
+    body.dark .content :global(strong),
+    body.dark .suggestion-card h4 {
         color: #f0f1f5;
     }
 
     body.dark .description,
     body.dark .content :global(p),
-    body.dark .content :global(li) {
+    body.dark .content :global(li),
+    body.dark .suggestion-card p {
         color: #aeb3c0;
     }
 
-    body.dark .toc-card {
+    body.dark .toc-card,
+    body.dark .suggest-modal-card {
         background: #17181e;
 
         border-color: #2b2d36;
     }
 
-    body.dark .toc-title {
+    body.dark .toc-title,
+    body.dark .suggestion-card {
         border-color: #30323d;
     }
 
@@ -1310,10 +1497,13 @@ const tocItems = headings.filter(
         color: #f0f1f5;
     }
 
-    /* =========================================
-     TABLET
-  ========================================= */
+    body.dark .form-group textarea {
+        background: #101116;
+        border-color: #2b2d36;
+        color: #e8eaf0;
+    }
 
+    /* RESPONSIVE */
     @media (max-width: 1100px) {
         .page-wrapper {
             width: min(calc(100% - 28px), 900px);
@@ -1347,10 +1537,6 @@ const tocItems = headings.filter(
             grid-template-columns: 40px minmax(0, 1fr);
         }
     }
-
-    /* =========================================
-     MOBILE
-  ========================================= */
 
     @media (max-width: 650px) {
         .navbar {
