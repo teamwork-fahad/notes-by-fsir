@@ -343,6 +343,36 @@ const tocItems = headings.filter(
 
                 if (!code) return;
 
+                // Check if this pre block belongs to a "Syntax" or "Output" heading section
+                let prev = pre.previousElementSibling;
+                let isSyntax = false;
+                let isOutput = false;
+                while (prev) {
+                    if (/^H[1-6]$/.test(prev.tagName)) {
+                        const headingText = prev.textContent.trim().toLowerCase();
+                        if (headingText.includes("syntax")) {
+                            isSyntax = true;
+                        } else if (headingText.includes("output")) {
+                            isOutput = true;
+                        }
+                        break;
+                    }
+                    if (prev.tagName === 'PRE' || prev.classList?.contains('code-block-container')) {
+                        break;
+                    }
+                    prev = prev.previousElementSibling;
+                }
+
+                if (isSyntax) {
+                    pre.classList.add("syntax-box-pre");
+                    return; // Skip heavy code container & line numbers for Syntax section
+                }
+
+                if (isOutput) {
+                    pre.classList.add("output-box-pre");
+                    return; // Skip heavy code container & line numbers for Output section
+                }
+
                 const preParent = pre.parentNode;
                 const nextSibling = pre.nextSibling;
 
@@ -830,6 +860,88 @@ const tocItems = headings.filter(
         color: #f1f2f5;
 
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    /* SYNTAX BOX STYLING (CLEAN LOOK WITHOUT CODE CONTAINER / LINE NUMBERS) */
+    .content :global(pre.syntax-box-pre) {
+        margin: 20px 0 !important;
+        padding: 16px 20px !important;
+        border-radius: 12px !important;
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        border-left: 5px solid #5b4bdb !important;
+        color: #1e293b !important;
+        box-shadow: 0 4px 14px rgba(91, 75, 219, 0.08) !important;
+        font-size: 15px !important;
+        line-height: 1.6 !important;
+    }
+
+    .content :global(pre.syntax-box-pre code) {
+        padding: 0 !important;
+        background: transparent !important;
+        color: #1e293b !important;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+        font-weight: 600 !important;
+    }
+
+    body.dark .content :global(pre.syntax-box-pre) {
+        background: #191e2b !important;
+        border-color: #2b354a !important;
+        border-left-color: #818cf8 !important;
+        color: #f1f5f9 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    body.dark .content :global(pre.syntax-box-pre code) {
+        color: #f1f5f9 !important;
+    }
+
+    /* OUTPUT BOX STYLING (TERMINAL CONSOLE LOOK) */
+    .content :global(pre.output-box-pre) {
+        margin: 20px 0 !important;
+        padding: 18px 22px !important;
+        border-radius: 14px !important;
+        background: #0f172a !important;
+        border: 1px solid #1e293b !important;
+        border-left: 5px solid #10b981 !important;
+        color: #38bdf8 !important;
+        box-shadow: 0 4px 18px rgba(16, 185, 129, 0.12) !important;
+        font-size: 14.5px !important;
+        line-height: 1.6 !important;
+        overflow-x: auto !important;
+        position: relative !important;
+    }
+
+    .content :global(pre.output-box-pre::before) {
+        content: "⚡ OUTPUT" !important;
+        display: block !important;
+        font-size: 11px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.08em !important;
+        color: #10b981 !important;
+        margin-bottom: 8px !important;
+        padding-bottom: 6px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        text-transform: uppercase !important;
+    }
+
+    .content :global(pre.output-box-pre code) {
+        padding: 0 !important;
+        background: transparent !important;
+        color: #38bdf8 !important;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+        font-weight: 500 !important;
+    }
+
+    body.dark .content :global(pre.output-box-pre) {
+        background: #090d16 !important;
+        border-color: #1e293b !important;
+        border-left-color: #10b981 !important;
+        box-shadow: 0 4px 22px rgba(0, 0, 0, 0.35) !important;
+    }
+
+    body.dark .content :global(pre.output-box-pre code) {
+        color: #38bdf8 !important;
     }
 
     .content :global(pre code) {
