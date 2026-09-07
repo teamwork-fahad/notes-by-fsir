@@ -1,0 +1,164 @@
+---
+import { getCollection } from "astro:content";
+
+const notes = await getCollection("cpp");
+
+const getChapterNumber = (chapter: string) => {
+	const [chapterNumber] = chapter.split(".");
+	return chapterNumber || chapter;
+};
+
+const getSortValue = (chapter: string) => {
+	const value = Number.parseFloat(chapter);
+	return Number.isNaN(value) ? Number.MAX_SAFE_INTEGER : value;
+};
+
+const sortedNotes = notes
+	.map((note) => ({
+		id: note.id,
+		url: `/cpp/${note.id}/`,
+		title: note.data.title,
+		description: note.data.description,
+		subject: note.data.subject,
+		chapter: note.data.chapter,
+		author: note.data.author,
+		chapterGroup: getChapterNumber(note.data.chapter),
+		sortValue: getSortValue(note.data.chapter),
+	}))
+	.sort((a, b) => a.sortValue - b.sortValue || a.title.localeCompare(b.title));
+
+const chapterMap = new Map<string, typeof sortedNotes>();
+
+for (const note of sortedNotes) {
+	if (!chapterMap.has(note.chapterGroup)) {
+		chapterMap.set(note.chapterGroup, []);
+	}
+
+	chapterMap.get(note.chapterGroup)?.push(note);
+}
+
+const chapters = Array.from(chapterMap.entries()).map(([chapter, items]) => ({
+	chapter,
+	items,
+}));
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<meta
+			name="description"
+			content="C++ programming concepts, OOP, notes and tutorials by Fahad Sir."
+		/>
+		<title>C++ Programming | Notes By FSir</title>
+	</head>
+
+	<body>
+		<header class="navbar">
+			<a href="/" class="logo">
+				Notes By <span>FSir</span>
+			</a>
+
+			<nav>
+				<a href="/">Home</a>
+				<a href="/#subjects">Subjects</a>
+				<a href="/#about">About</a>
+			</nav>
+
+			<div class="nav-actions">
+				<button id="themeToggle" class="theme-btn" aria-label="Toggle theme">
+					🌙
+				</button>
+				<a href="/login" class="back-btn">Login</a>
+			</div>
+		</header>
+
+		<main class="page-wrapper">
+			<div class="header-section">
+				<div class="brand-badge">💻 C++ Subject Notes</div>
+				<h1>C++ Programming</h1>
+				<p class="subtitle">
+					Comprehensive C++ programming notes, OOPs concepts, syntax & examples by Fahad Sir.
+				</p>
+			</div>
+
+			<div class="chapters-container">
+				{
+					chapters.length === 0 ? (
+						<div class="empty-box">
+							<p>📚 No C++ notes available yet. Check back soon!</p>
+						</div>
+					) : (
+						chapters.map(({ chapter, items }) => (
+							<section class="chapter-block">
+								<div class="chapter-title">
+									<span>Unit / Chapter {chapter}</span>
+								</div>
+
+								<div class="notes-grid">
+									{items.map((note) => (
+										<a href={note.url} class="note-card">
+											<div class="card-meta">
+												<span class="chapter-pill">{note.chapter}</span>
+												<span class="author-name">👨‍🏫 {note.author}</span>
+											</div>
+
+											<h3>{note.title}</h3>
+											<p>{note.description}</p>
+
+											<div class="card-footer">
+												<span class="read-btn">Read Note →</span>
+											</div>
+										</a>
+									))}
+								</div>
+							</section>
+						))
+					)
+				}
+			</div>
+		</main>
+
+		<footer>
+			<div class="footer-logo">
+				Notes By <span>FSir</span>
+			</div>
+			<p>Created with ❤️ by Fahad Sir</p>
+			<p class="copyright">© 2026 Notes By FSir. All rights reserved.</p>
+		</footer>
+	</body>
+</html>
+
+<style>
+	:global(*) { box-sizing: border-box; margin: 0; padding: 0; }
+	:global(body) { font-family: Inter, system-ui, sans-serif; color: #202534; background: #ffffff; min-height: 100vh; }
+	.navbar { height: 70px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; sticky: top; background: rgba(255, 255, 255, 0.92); border-bottom: 1px solid #e6e8ee; }
+	.logo { color: #202534; text-decoration: none; font-size: 21px; font-weight: 800; }
+	.logo span { color: #5b4bdb; }
+	nav { display: flex; gap: 25px; }
+	.navbar nav a { color: #687185; text-decoration: none; font-size: 14px; font-weight: 600; }
+	.nav-actions { display: flex; gap: 10px; align-items: center; }
+	.theme-btn, .back-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid #dedfe8; background: white; cursor: pointer; text-decoration: none; color: #4d5668; font-weight: 600; font-size: 14px; }
+	.page-wrapper { width: min(calc(100% - 40px), 1200px); margin: auto; padding: 40px 0 90px; }
+	.header-section { text-align: center; margin-bottom: 50px; }
+	.brand-badge { display: inline-block; padding: 6px 14px; background: #f0edff; color: #5b4bdb; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 15px; }
+	h1 { font-size: 42px; color: #202534; margin-bottom: 12px; }
+	.subtitle { color: #687185; font-size: 17px; max-width: 600px; margin: auto; }
+	.chapter-block { margin-bottom: 45px; }
+	.chapter-title { font-size: 20px; font-weight: 700; color: #202534; margin-bottom: 20px; padding-bottom: 8px; border-bottom: 2px solid #f0edff; }
+	.notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px; }
+	.note-card { background: white; border: 1px solid #e6e8ee; border-radius: 14px; padding: 24px; text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+	.note-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08); border-color: #c7c1ff; }
+	.card-meta { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 12px; }
+	.chapter-pill { background: #f0edff; color: #5b4bdb; padding: 3px 9px; border-radius: 6px; font-weight: 700; }
+	.author-name { color: #858c9b; }
+	.note-card h3 { font-size: 19px; color: #202534; margin-bottom: 8px; font-weight: 700; }
+	.note-card p { color: #687185; font-size: 14px; line-height: 1.6; margin-bottom: 20px; flex-grow: 1; }
+	.card-footer { border-top: 1px solid #f0f1f5; padding-top: 12px; text-align: right; }
+	.read-btn { color: #5b4bdb; font-weight: 700; font-size: 14px; }
+	footer { text-align: center; padding: 50px 0; border-top: 1px solid #e6e8ee; color: #687185; margin-top: 60px; }
+	.footer-logo { font-size: 20px; font-weight: 800; color: #202534; margin-bottom: 8px; }
+	.footer-logo span { color: #5b4bdb; }
+</style>

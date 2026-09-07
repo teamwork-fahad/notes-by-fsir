@@ -1,0 +1,216 @@
+---
+import { getCollection, render } from "astro:content";
+import { getSupabaseConfig } from "../../lib/supabase";
+
+const config = getSupabaseConfig();
+
+export async function getStaticPaths() {
+    const posts = await getCollection("cpp");
+
+    return posts.map((post) => ({
+        params: {
+            slug: post.id,
+        },
+        props: {
+            post,
+        },
+    }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+
+const tocItems = headings.filter(
+    (heading) => heading.depth === 2 || heading.depth === 3,
+);
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<title>{post.data.title} | C++ Notes By FSir</title>
+		<meta name="description" content={post.data.description} />
+	</head>
+
+	<body>
+		<header class="navbar">
+			<a href="/" class="logo">
+				Notes By <span>FSir</span>
+			</a>
+
+			<nav>
+				<a href="/">Home</a>
+				<a href="/cpp">C++ Notes</a>
+				<a href="/#about">About</a>
+			</nav>
+
+			<div class="nav-actions">
+				<button id="themeToggle" class="theme-btn" aria-label="Toggle theme">
+					🌙
+				</button>
+				<a href="/cpp" class="back-btn">← Back to C++</a>
+			</div>
+		</header>
+
+		<main class="page-wrapper">
+			<div class="breadcrumb">
+				<a href="/">Home</a> <span>/</span> <a href="/cpp">C++</a> <span>/</span> <span>{post.data.title}</span>
+			</div>
+
+			<div class="layout">
+				<article class="article">
+					<div class="article-header">
+						<div class="article-meta">
+							<span class="subject-badge">💻 {post.data.subject} • Chapter {post.data.chapter}</span>
+							<span class="author">👨‍🏫 By {post.data.author}</span>
+						</div>
+
+						<h1>{post.data.title}</h1>
+						<p class="description">{post.data.description}</p>
+					</div>
+
+					<div class="reading-progress">
+						<div id="progressBar"></div>
+					</div>
+
+					<div class="content">
+						<Content />
+					</div>
+				</article>
+
+				{tocItems.length > 0 && (
+					<aside class="toc-sidebar">
+						<div class="toc-card">
+							<h3>📌 Table of Contents</h3>
+							<ul>
+								{tocItems.map((h) => (
+									<li class={`depth-${h.depth}`}>
+										<a href={`#${h.slug}`}>{h.text}</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					</aside>
+				)}
+			</div>
+		</main>
+
+		<footer>
+			<div class="footer-logo">
+				Notes By <span>FSir</span>
+			</div>
+			<p>Created with ❤️ by Fahad Sir</p>
+			<p class="copyright">© 2026 Notes By FSir. All rights reserved.</p>
+		</footer>
+
+		<script is:inline>
+			const codeBlocks = document.querySelectorAll(".content pre");
+			codeBlocks.forEach((pre) => {
+				const code = pre.querySelector("code");
+				if (!code) return;
+
+				let prev = pre.previousElementSibling;
+				let isSyntax = false;
+				let isOutput = false;
+
+				while (prev) {
+					if (/^H[1-6]$/.test(prev.tagName)) {
+						const headingText = prev.textContent.trim().toLowerCase();
+						if (headingText.includes("syntax")) isSyntax = true;
+						else if (headingText.includes("output")) isOutput = true;
+						break;
+					}
+					if (prev.tagName === 'PRE' || prev.classList?.contains('code-block-container')) break;
+					prev = prev.previousElementSibling;
+				}
+
+				if (isSyntax) { pre.classList.add("syntax-box-pre"); return; }
+				if (isOutput) { pre.classList.add("output-box-pre"); return; }
+
+				const preParent = pre.parentNode;
+				if (!preParent) return;
+
+				const container = document.createElement("div");
+				container.className = "code-block-container";
+				const header = document.createElement("div");
+				header.className = "code-block-header";
+				const langLabel = document.createElement("span");
+				langLabel.className = "code-block-language";
+				langLabel.textContent = "CPP";
+				const copyBtn = document.createElement("button");
+				copyBtn.className = "copy-code-btn";
+				copyBtn.textContent = "Copy";
+				header.append(langLabel, copyBtn);
+
+				const body = document.createElement("div");
+				body.className = "code-block-body";
+				const lineNumbers = document.createElement("div");
+				lineNumbers.className = "code-line-numbers";
+				const rawLines = code.textContent.replace(/\t/g, "    ").split("\n");
+				const lineCount = rawLines[rawLines.length - 1] === "" ? rawLines.length - 1 : rawLines.length;
+				lineNumbers.innerHTML = Array.from({ length: Math.max(lineCount, 1) })
+					.map((_, i) => `<span>${i + 1}</span>`)
+					.join("");
+
+				body.append(lineNumbers, pre);
+				container.append(header, body);
+				preParent.insertBefore(container, pre.nextSibling || pre);
+
+				copyBtn.addEventListener("click", async () => {
+					await navigator.clipboard.writeText(code.innerText);
+					copyBtn.textContent = "Copied!";
+					setTimeout(() => { copyBtn.textContent = "Copy"; }, 1400);
+				});
+			});
+		</script>
+
+		<style>
+			:global(*) { box-sizing: border-box; margin: 0; padding: 0; }
+			:global(body) { font-family: Inter, system-ui, sans-serif; color: #202534; background: #ffffff; }
+			.navbar { height: 70px; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; sticky: top; background: rgba(255, 255, 255, 0.92); border-bottom: 1px solid #e6e8ee; }
+			.logo { color: #202534; text-decoration: none; font-size: 21px; font-weight: 800; }
+			.logo span { color: #5b4bdb; }
+			nav { display: flex; gap: 25px; }
+			.navbar nav a { color: #687185; text-decoration: none; font-size: 14px; font-weight: 600; }
+			.nav-actions { display: flex; gap: 10px; align-items: center; }
+			.theme-btn, .back-btn { padding: 8px 14px; border-radius: 8px; border: 1px solid #dedfe8; background: white; cursor: pointer; text-decoration: none; color: #4d5668; font-weight: 600; font-size: 14px; }
+			.page-wrapper { width: min(calc(100% - 40px), 1200px); margin: auto; padding: 35px 0 90px; }
+			.breadcrumb { display: flex; gap: 9px; align-items: center; margin-bottom: 25px; color: #858c9b; font-size: 13px; }
+			.breadcrumb a { color: #656d7d; text-decoration: none; }
+			.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 30px; align-items: start; }
+			.article { background: white; border: 1px solid #e5e7ed; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 35px rgba(30, 35, 60, 0.05); }
+			.article-header { padding: 40px 50px 30px; }
+			.article-meta { display: flex; justify-content: space-between; margin-bottom: 15px; }
+			.subject-badge { background: #f0edff; color: #5b4bdb; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; }
+			.author { color: #858c9b; font-size: 13px; }
+			.article h1 { font-size: 38px; color: #202534; line-height: 1.2; margin-bottom: 12px; }
+			.description { color: #6b7384; font-size: 16px; line-height: 1.6; }
+			.reading-progress { height: 3px; background: #eeeef5; }
+			#progressBar { width: 0%; height: 100%; background: #5b4bdb; }
+			.content { padding: 30px 50px 50px; font-size: 17px; line-height: 1.8; }
+			.content :global(h1), .content :global(h2) { margin-top: 35px; margin-bottom: 15px; color: #202534; }
+			.content :global(p) { margin-bottom: 20px; }
+			.content :global(pre.syntax-box-pre) { margin: 20px 0 !important; padding: 16px 20px !important; border-radius: 12px !important; background: #f1f5f9 !important; border: 1px solid #cbd5e1 !important; border-left: 5px solid #5b4bdb !important; color: #1e293b !important; font-size: 15px !important; }
+			.content :global(pre.output-box-pre) { margin: 20px 0 !important; padding: 18px 22px !important; border-radius: 14px !important; background: #0f172a !important; border-left: 5px solid #10b981 !important; color: #38bdf8 !important; font-size: 14.5px !important; position: relative !important; }
+			.content :global(pre.output-box-pre::before) { content: "⚡ OUTPUT" !important; display: block !important; font-size: 11px !important; color: #10b981 !important; margin-bottom: 8px !important; }
+			:global(.code-block-container) { margin: 25px 0; border-radius: 16px; overflow: hidden; background: #0f1720; }
+			:global(.code-block-header) { display: flex; justify-content: space-between; padding: 12px 18px; background: rgba(15, 23, 32, 0.96); border-bottom: 1px solid rgba(255,255,255,0.06); }
+			:global(.code-block-language) { color: #8fbfe0; font-size: 12px; font-weight: 700; }
+			:global(.copy-code-btn) { padding: 6px 12px; border: none; border-radius: 20px; background: rgba(255,255,255,0.1); color: white; cursor: pointer; font-size: 12px; font-weight: 700; }
+			:global(.code-block-body) { display: grid; grid-template-columns: auto 1fr; }
+			:global(.code-line-numbers) { padding: 18px 14px; color: rgba(255,255,255,0.4); font-size: 12px; line-height: 1.7; border-right: 1px solid rgba(255,255,255,0.08); text-align: right; }
+			:global(.code-line-numbers span) { display: block; }
+			.content :global(pre) { padding: 18px; margin: 0; background: transparent; }
+			.toc-sidebar { position: sticky; top: 90px; }
+			.toc-card { background: white; border: 1px solid #e5e7ed; border-radius: 14px; padding: 20px; }
+			.toc-card h3 { font-size: 15px; margin-bottom: 12px; color: #202534; }
+			.toc-card ul { list-style: none; }
+			.toc-card li { margin-bottom: 8px; font-size: 13.5px; }
+			.toc-card a { color: #687185; text-decoration: none; }
+			.toc-card a:hover { color: #5b4bdb; }
+			footer { text-align: center; padding: 50px 0; border-top: 1px solid #e6e8ee; color: #687185; margin-top: 60px; }
+		</style>
+	</body>
+</html>

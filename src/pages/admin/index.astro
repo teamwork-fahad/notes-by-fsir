@@ -29,6 +29,19 @@ const subjects = [
 	{ name: "JavaScript", count: jsNotes.length, icon: "⚡" },
 ];
 
+const allNotes = [
+	...phpNotes,
+	...cppNotes,
+	...pythonNotes,
+	...javaNotes,
+	...cNotes,
+	...mysqlNotes,
+	...dsaNotes,
+	...htmlNotes,
+	...cssNotes,
+	...jsNotes,
+];
+
 const totalNotes = subjects.reduce((sum, s) => sum + s.count, 0);
 const totalSubjects = subjects.length;
 ---
@@ -231,7 +244,7 @@ const totalSubjects = subjects.length;
 								</thead>
 								<tbody>
 									{
-										phpNotes.map((note) => (
+										allNotes.map((note) => (
 											<tr>
 												<td>
 													<span class="chapter-badge">{note.data.chapter}</span>
@@ -243,7 +256,7 @@ const totalSubjects = subjects.length;
 												</td>
 												<td><span class="subject-pill">{note.data.subject}</span></td>
 												<td>{note.data.author}</td>
-												<td><code>src/content/php/{note.id}.md</code></td>
+												<td><code>src/content/${note.collection}/${note.id}</code></td>
 												<td class="actions-cell">
 													<a href={`/admin/notes/edit/${note.id}`} class="action-btn edit-note-btn">
 														✏️ Edit

@@ -89,7 +89,10 @@ export const POST: APIRoute = async ({ request }) => {
       cleanFilename += ".md";
     }
 
-    const targetSubject = subject.toLowerCase().trim();
+    let targetSubject = subject.toLowerCase().trim();
+    if (targetSubject === "c++") targetSubject = "cpp";
+    if (targetSubject === "javascript") targetSubject = "js";
+
     const filePath = `src/content/${targetSubject}/${cleanFilename}`;
     const commitMessage = `admin(note): delete note ${filePath}`;
 
