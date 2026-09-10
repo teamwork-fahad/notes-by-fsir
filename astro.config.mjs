@@ -5,35 +5,16 @@ import vercel from '@astrojs/vercel';
 const shimAstroNodePolyfills = () => ({
   name: 'shim-astro-node-polyfills',
   enforce: 'pre',
-  resolveId(id) {
-    if (id === 'astro/app/node') {
-      return '\0astro/app/node-shim';
+  resolveId(id, importer) {
+    if (id === 'astro/app/node' && !importer?.includes('astro-node-shim')) {
+      return '\0astro-node-shim';
     }
   },
   load(id) {
-    if (id === '\0astro/app/node-shim') {
+    if (id === '\0astro-node-shim') {
       return `
-        import {
-          NodeApp,
-          loadApp,
-          loadManifest,
-          createRequest,
-          createRequestFromNodeRequest,
-          writeResponse,
-          getAbortControllerCleanup
-        } from "astro/dist/core/app/node.js";
-
+        export * from 'astro/app/node';
         export function applyPolyfills() {}
-
-        export {
-          NodeApp,
-          createRequest,
-          createRequestFromNodeRequest,
-          getAbortControllerCleanup,
-          loadApp,
-          loadManifest,
-          writeResponse
-        };
       `;
     }
   }
