@@ -20,11 +20,26 @@ const shimAstroNodePolyfills = () => ({
   }
 });
 
+// Create Vercel adapter and patch astro:build:ssr hook for Astro 7 compatibility
+const vercelAdapter = vercel({
+  entrypointResolution: 'auto',
+});
+
+const originalBuildSsr = vercelAdapter.hooks['astro:build:ssr'];
+if (originalBuildSsr) {
+  vercelAdapter.hooks['astro:build:ssr'] = async (options) => {
+    if (options && !options.entryPoints) {
+      options.entryPoints = options.routes
+        ? new Map(options.routes.map(r => [{ component: r.component, pattern: r.pattern, prerender: r.prerender }, r.entrypoint]))
+        : new Map();
+    }
+    return originalBuildSsr(options);
+  };
+}
+
 // https://astro.build/config
 export default defineConfig({
-  adapter: vercel({
-    entrypointResolution: 'auto',
-  }),
+  adapter: vercelAdapter,
   vite: {
     plugins: [shimAstroNodePolyfills()],
   },
