@@ -22,7 +22,9 @@ const shimAstroNodePolyfills = () => ({
 
 // https://astro.build/config
 export default defineConfig({
-  adapter: vercel(),
+  adapter: vercel({
+    entrypointResolution: 'auto',
+  }),
   vite: {
     plugins: [shimAstroNodePolyfills()],
   },
