@@ -1,0 +1,33 @@
+---
+title: Introduction to HTML
+description: Learn the basics of HTML
+---
+
+# Introduction to HTML
+
+HTML (HyperText Markup Language) is the standard markup language used to structure content on the web.
+
+## What does HTML do?
+
+HTML allows us to define:
+
+- Headings and paragraphs
+- Links and images
+- Lists and tables
+- Forms and inputs
+
+## Example
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>My Page</title>
+  </head>
+  <body>
+    <h1>Hello, World!</h1>
+    <p>This is a paragraph of text.</p>
+  </body>
+</html>
+```
