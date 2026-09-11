@@ -29,4 +29,7 @@ export const collections = {
   html: createSubjectCollection("html"),
   css: createSubjectCollection("css"),
   js: createSubjectCollection("js"),
+  maths: createSubjectCollection("maths"),
+  foc: createSubjectCollection("foc"),
+  docs: createSubjectCollection("docs"),
 };
