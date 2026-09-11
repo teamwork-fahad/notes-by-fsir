@@ -1,9 +1,11 @@
 ---
-title: Fundamentals of Computer
-description: >-
-  Essential concepts about computers, operating systems, and office
-  applications.
+title: 'Fundamentals of Computer'
+description: 'Essential concepts about computers, operating systems, and office applications.'
+subject: foc
+chapter: Overview
+author: teamwork-fahad
 ---
+
 # Fundamentals of Computer(FOC)
 
 Welcome to the Fundamentals of Computer course. This section covers essential concepts and knowledge about computers, operating systems, and office applications.

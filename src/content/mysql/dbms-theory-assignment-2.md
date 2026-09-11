@@ -1,6 +1,9 @@
 ---
 title: 'DBMS Theory Assignment - 2'
 description: 'Easy-English answers for M.C.A. first-semester DBMS Theory Assignment - 2.'
+subject: mysql
+chapter: Assignment 2
+author: teamwork-fahad
 ---
 
 # M.C.A. 1st Semester (2026-2027)

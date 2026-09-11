@@ -1,6 +1,9 @@
 ---
 title: Introduction to HTML
 description: Learn the basics of HTML
+subject: html
+chapter: Introduction
+author: teamwork-fahad
 ---
 
 # Introduction to HTML

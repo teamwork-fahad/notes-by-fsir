@@ -1,6 +1,9 @@
 ---
 title: Introduction to CSS
 description: Learn the basics of CSS
+subject: css
+chapter: Introduction
+author: teamwork-fahad
 ---
 
 # Introduction to CSS

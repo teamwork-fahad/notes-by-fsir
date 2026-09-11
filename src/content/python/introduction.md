@@ -1,6 +1,9 @@
 ---
 title: Introduction to Python
 description: Learn the basics of Python
+subject: python
+chapter: Introduction
+author: teamwork-fahad
 ---
 
 # Introduction to Python
@@ -15,29 +18,3 @@ Python is commonly used for:
 - Web backends
 - Data analysis and machine learning
 - Building command-line tools
-
-## Example
-
-```python
-name = "Fahad"
-
-print(f"Hello, {name}!")
-```
-
-## Variables and data types
-
-```python
-age = 21
-height = 5.9
-is_student = True
-subjects = ["Maths", "SQL", "Python"]
-```
-
-## A simple function
-
-```python
-def greet(name):
-    return f"Hello, {name}!"
-
-print(greet("World"))
-```

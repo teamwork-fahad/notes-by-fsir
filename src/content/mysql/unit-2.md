@@ -1,6 +1,9 @@
 ---
 title: 'Database Backup and CSV Handling'
 description: 'Use the SQLite command-line tool for dumps and CSV import/export.'
+subject: mysql
+chapter: Unit 2
+author: teamwork-fahad
 ---
 
 ## 2.1 SQLite Dump
@@ -11,12 +14,4 @@ Open a database:
 
 ```bash
 sqlite3 school.db
-```
-
-Dump one table as SQL:
-
-```text
-.output students.sql
-.dump students
-.output stdout
 ```

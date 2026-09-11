@@ -1,6 +1,9 @@
 ---
 title: Introduction to JavaScript
 description: Learn the basics of JavaScript
+subject: js
+chapter: Introduction
+author: teamwork-fahad
 ---
 
 # Introduction to JavaScript
