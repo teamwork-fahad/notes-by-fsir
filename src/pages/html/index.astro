@@ -1,0 +1,27 @@
+---
+// Minimal index for html notes
+---
+
+<script context="module">
+  import { getCollection } from "astro:content";
+  export async function get() {
+    const posts = await getCollection("html");
+    return { props: { posts } };
+  }
+</script>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>HTML — Notes By FSir</title>
+  </head>
+  <body>
+    <h1>HTML Notes</h1>
+    <ul>
+      {Astro.props.posts.map((p) => (
+        <li><a href={`/html/${p.id}`}>{p.data.title}</a></li>
+      ))}
+    </ul>
+  </body>
+</html>

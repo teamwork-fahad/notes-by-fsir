@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("python");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{post.data.title} | Python</title>
+  </head>
+  <body>
+    <a href="/python">← Back to Python</a>
+    <h1>{post.data.title}</h1>
+    <p>{post.data.description}</p>
+    <article>
+      <Content />
+    </article>
+  </body>
+</html>

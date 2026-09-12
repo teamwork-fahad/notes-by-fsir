@@ -1,0 +1,27 @@
+---
+// Minimal index for docs notes
+---
+
+<script context="module">
+  import { getCollection } from "astro:content";
+  export async function get() {
+    const posts = await getCollection("docs");
+    return { props: { posts } };
+  }
+</script>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Docs — Notes By FSir</title>
+  </head>
+  <body>
+    <h1>Docs</h1>
+    <ul>
+      {Astro.props.posts.map((p) => (
+        <li><a href={`/docs/${p.id}`}>{p.data.title}</a></li>
+      ))}
+    </ul>
+  </body>
+</html>
