@@ -1,5 +1,4 @@
 import { defineCollection } from "astro:content";
-import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
 const noteSchema = z.object({
@@ -10,26 +9,18 @@ const noteSchema = z.object({
   author: z.string(),
 });
 
-const createSubjectCollection = (dirName: string) => defineCollection({
-  loader: glob({
-    pattern: "**/*.md",
-    base: `./src/content/${dirName}`,
-  }),
-  schema: noteSchema,
-});
-
 export const collections = {
-  php: createSubjectCollection("php"),
-  python: createSubjectCollection("python"),
-  java: createSubjectCollection("java"),
-  cpp: createSubjectCollection("cpp"),
-  c: createSubjectCollection("c"),
-  mysql: createSubjectCollection("mysql"),
-  dsa: createSubjectCollection("dsa"),
-  html: createSubjectCollection("html"),
-  css: createSubjectCollection("css"),
-  js: createSubjectCollection("js"),
-  maths: createSubjectCollection("maths"),
-  foc: createSubjectCollection("foc"),
-  docs: createSubjectCollection("docs"),
+  php: defineCollection({ schema: noteSchema }),
+  python: defineCollection({ schema: noteSchema }),
+  java: defineCollection({ schema: noteSchema }),
+  cpp: defineCollection({ schema: noteSchema }),
+  c: defineCollection({ schema: noteSchema }),
+  mysql: defineCollection({ schema: noteSchema }),
+  dsa: defineCollection({ schema: noteSchema }),
+  html: defineCollection({ schema: noteSchema }),
+  css: defineCollection({ schema: noteSchema }),
+  js: defineCollection({ schema: noteSchema }),
+  maths: defineCollection({ schema: noteSchema }),
+  foc: defineCollection({ schema: noteSchema }),
+  docs: defineCollection({ schema: noteSchema }),
 };
