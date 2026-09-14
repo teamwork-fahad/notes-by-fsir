@@ -1,22 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import "../../styles/site.css";
-
-const posts = await getCollection("maths");
+import SubjectIndex from "../../components/SubjectIndex.astro";
+const notes = await getCollection("maths");
 ---
-
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>Maths — Notes By FSir</title>
-  </head>
-  <body>
-    <h1>Maths Notes</h1>
-    <ul>
-      {posts.map((p) => (
-        <li><a href={`/maths/${p.id}`}>{p.data.title}</a></li>
-      ))}
-    </ul>
-  </body>
-</html>
+<SubjectIndex notes={notes} slug="maths" label="Maths" title="Mathematics" description="Study mathematics concepts, units, formulas, and solved examples in a clear format." />

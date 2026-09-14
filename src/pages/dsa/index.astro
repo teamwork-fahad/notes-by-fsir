@@ -1,22 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import "../../styles/site.css";
-
-const posts = await getCollection("dsa");
+import SubjectIndex from "../../components/SubjectIndex.astro";
+const notes = await getCollection("dsa");
 ---
-
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>DSA — Notes By FSir</title>
-  </head>
-  <body>
-    <h1>DSA Notes</h1>
-    <ul>
-      {posts.map((p) => (
-        <li><a href={`/dsa/${p.id}`}>{p.data.title}</a></li>
-      ))}
-    </ul>
-  </body>
-</html>
+<SubjectIndex notes={notes} slug="dsa" label="DSA" title="Data Structures & Algorithms" description="Learn core data structures, algorithms, searching, sorting, and practical problem-solving." />

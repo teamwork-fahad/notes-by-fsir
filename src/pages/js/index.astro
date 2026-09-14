@@ -1,22 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import "../../styles/site.css";
-
-const posts = await getCollection("js");
+import SubjectIndex from "../../components/SubjectIndex.astro";
+const notes = await getCollection("js");
 ---
-
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>JavaScript — Notes By FSir</title>
-  </head>
-  <body>
-    <h1>JavaScript Notes</h1>
-    <ul>
-      {posts.map((p) => (
-        <li><a href={`/js/${p.id}`}>{p.data.title}</a></li>
-      ))}
-    </ul>
-  </body>
-</html>
+<SubjectIndex notes={notes} slug="js" label="JavaScript" title="JavaScript Development" description="Learn JavaScript concepts, browser APIs, and Angular fundamentals with practical notes." />

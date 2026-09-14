@@ -1,22 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import "../../styles/site.css";
-
-const posts = await getCollection("mysql");
+import SubjectIndex from "../../components/SubjectIndex.astro";
+const notes = await getCollection("mysql");
 ---
-
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <title>MySQL — Notes By FSir</title>
-  </head>
-  <body>
-    <h1>MySQL Notes</h1>
-    <ul>
-      {posts.map((p) => (
-        <li><a href={`/mysql/${p.id}`}>{p.data.title}</a></li>
-      ))}
-    </ul>
-  </body>
-</html>
+<SubjectIndex notes={notes} slug="mysql" label="MySQL" title="MySQL & SQL" description="Learn SQL queries, DBMS concepts, exercises, SQLite, and database practice." />

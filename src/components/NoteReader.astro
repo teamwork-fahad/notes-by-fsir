@@ -1,0 +1,85 @@
+---
+import "../styles/site.css";
+
+interface Props {
+  post: any;
+  content: any;
+  headings: any[];
+  slug: string;
+  label: string;
+}
+
+const { post, content: Content, headings, slug, label } = Astro.props;
+const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const chapter = post.data.chapter ?? "General";
+const author = post.data.author ?? "Fahad Sir";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{post.data.title} | Notes By FSir</title>
+    <meta name="description" content={post.data.description ?? `${label} note by Fahad Sir`} />
+  </head>
+  <body>
+    <header class="navbar">
+      <a href="/" class="logo">Notes By <span>FSir</span></a>
+      <nav><a href="/">Home</a><a href="/#subjects">Subjects</a><a href="/#about">About</a></nav>
+      <div class="nav-actions">
+        <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">moon</button>
+        <a href="/{slug}" class="back-btn">Back to {label}</a>
+      </div>
+    </header>
+
+    <main class="page-wrapper note-reader">
+      <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href={`/${slug}`}>{label}</a><span>/</span><span>{post.data.title}</span></div>
+      <div class="layout">
+        <article class="article">
+          <header class="article-header">
+            <div class="article-meta"><span class="subject-badge">{label} · {chapter}</span><span class="author">By {author}</span></div>
+            <h1>{post.data.title}</h1>
+            {post.data.description && <p class="description">{post.data.description}</p>}
+          </header>
+          <div class="reading-progress"><div id="progressBar"></div></div>
+          <div class="content"><Content /></div>
+          <div class="end-note"><strong>Topic completed</strong><span>Keep learning and practicing.</span></div>
+        </article>
+
+        <aside class="toc-sidebar">
+          <div class="toc-card">
+            <div class="toc-heading"><strong>On this page</strong><span>{tocItems.length}</span></div>
+            {tocItems.length > 0 ? <nav class="toc-links">{tocItems.map((item) => <a class:list={{ "toc-subitem": item.depth === 3 }} href={`#${item.slug}`}>{item.text}</a>)}</nav> : <p class="toc-empty">This note has no sections yet.</p>}
+          </div>
+        </aside>
+      </div>
+    </main>
+
+    <footer><div class="footer-logo">Notes By <span>FSir</span></div><p>Created by Fahad Sir</p><small>© 2026 Notes By FSir. All rights reserved.</small></footer>
+
+    <script>
+      const themeButton = document.getElementById("themeToggle");
+      if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark");
+      const updateTheme = () => { if (themeButton) themeButton.textContent = document.body.classList.contains("dark") ? "sun" : "moon"; };
+      updateTheme();
+      themeButton?.addEventListener("click", () => { document.body.classList.toggle("dark"); localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light"); updateTheme(); });
+
+      const progressBar = document.getElementById("progressBar");
+      const updateProgress = () => { const article = document.querySelector(".content"); if (!article || !progressBar) return; const top = article.getBoundingClientRect().top + window.scrollY; const total = article.scrollHeight - window.innerHeight; progressBar.style.width = `${Math.min(100, Math.max(0, ((window.scrollY - top + 80) / total) * 100))}%`; };
+      window.addEventListener("scroll", updateProgress, { passive: true });
+      updateProgress();
+
+      document.querySelectorAll(".content pre").forEach((pre) => {
+        const code = pre.querySelector("code");
+        if (!code || pre.parentElement?.classList.contains("code-block-container")) return;
+        const container = document.createElement("div"); container.className = "code-block-container";
+        const header = document.createElement("div"); header.className = "code-block-header";
+        const label = document.createElement("span"); label.textContent = "CODE"; label.className = "code-block-language";
+        const button = document.createElement("button"); button.textContent = "Copy"; button.className = "copy-code-btn";
+        button.addEventListener("click", async () => { await navigator.clipboard.writeText(code.innerText); button.textContent = "Copied"; setTimeout(() => { button.textContent = "Copy"; }, 1200); });
+        header.append(label, button); pre.parentNode?.insertBefore(container, pre); container.append(header, pre);
+      });
+    </script>
+  </body>
+</html>

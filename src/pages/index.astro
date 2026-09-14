@@ -1,42 +1,26 @@
 ---
-const subjects = [
-	{
-		name: "PHP",
-		icon: "🐘",
-		description: "PHP notes, programs, examples and practicals.",
-		href: "/php",
-	},
-	{
-		name: "C",
-		icon: "⚙️",
-		description: "C programming notes, concepts and programs.",
-		href: "/c",
-	},
-	{
-		name: "C++",
-		icon: "💻",
-		description: "C++ concepts, OOP, programs and examples.",
-		href: "/cpp",
-	},
-	{
-		name: "Python",
-		icon: "🐍",
-		description: "Python programming notes and practical examples.",
-		href: "/python",
-	},
-	{
-		name: "MySQL",
-		icon: "🗄️",
-		description: "MySQL queries, database concepts and examples.",
-		href: "/mysql",
-	},
-	{
-		name: "DSA",
-		icon: "🌳",
-		description: "Data Structures and Algorithms notes and programs.",
-		href: "/dsa",
-	},
+import { getCollection } from "astro:content";
+
+const subjectDefinitions = [
+	{ collection: "php", name: "PHP", icon: "🐘", description: "PHP notes, programs, examples and practicals.", href: "/php" },
+	{ collection: "cpp", name: "C++", icon: "💻", description: "C++ concepts, OOP, programs and examples.", href: "/cpp" },
+	{ collection: "python", name: "Python", icon: "🐍", description: "Python programming notes and practical examples.", href: "/python" },
+	{ collection: "mysql", name: "MySQL", icon: "🗄️", description: "SQL queries, database concepts and exercises.", href: "/mysql" },
+	{ collection: "dsa", name: "DSA", icon: "🌳", description: "Data Structures and Algorithms notes and programs.", href: "/dsa" },
+	{ collection: "css", name: "CSS", icon: "🎨", description: "CSS fundamentals, layout and practical styling examples.", href: "/css" },
+	{ collection: "html", name: "HTML", icon: "🌐", description: "HTML structure, elements and semantic web development.", href: "/html" },
+	{ collection: "js", name: "JavaScript", icon: "⚡", description: "JavaScript concepts, browser APIs and Angular notes.", href: "/js" },
+	{ collection: "maths", name: "Mathematics", icon: "📐", description: "Mathematics units, formulas and solved examples.", href: "/maths" },
+	{ collection: "foc", name: "Computer Fundamentals", icon: "🖥️", description: "Computer fundamentals with clear unit-wise notes.", href: "/foc" },
+	{ collection: "docs", name: "Documentation", icon: "📚", description: "Guides, references and practical documentation.", href: "/docs" },
 ];
+
+const subjects = (await Promise.all(
+	subjectDefinitions.map(async (subject) => ({
+		...subject,
+		count: (await getCollection(subject.collection as Parameters<typeof getCollection>[0])).length,
+	})),
+)).filter((subject) => subject.count > 0);
 ---
 
 <!doctype html>
@@ -100,6 +84,7 @@ const subjects = [
 					<div class="search-box">
 						<span>🔍</span>
 						<input
+							id="homeSearch"
 							type="text"
 							placeholder="Search PHP, C, Python, MySQL..."
 							aria-label="Search notes"
@@ -137,6 +122,8 @@ const subjects = [
 								<h3>{subject.name}</h3>
 
 								<p>{subject.description}</p>
+
+								<span class="note-count">{subject.count} {subject.count === 1 ? "note" : "notes"}</span>
 
 								<span class="read-more">View Notes →</span>
 							</a>
@@ -500,6 +487,13 @@ const subjects = [
 				line-height: 1.55;
 			}
 
+			.note-count {
+				margin-top: 16px;
+				color: var(--teal);
+				font-size: 0.78rem;
+				font-weight: 700;
+			}
+
 			.read-more {
 				margin-top: auto;
 				padding-top: 22px;
@@ -655,6 +649,15 @@ const subjects = [
 				const isDark = document.body.classList.contains("dark");
 				localStorage.setItem("theme", isDark ? "dark" : "light");
 				themeButton.textContent = isDark ? "☀️" : "🌙";
+			});
+
+			const homeSearch = document.getElementById("homeSearch") as HTMLInputElement | null;
+			const subjectCards = Array.from(document.querySelectorAll(".subject-card"));
+			homeSearch?.addEventListener("input", () => {
+				const query = homeSearch.value.trim().toLowerCase();
+				subjectCards.forEach((card) => {
+					card.hidden = query !== "" && !card.textContent.toLowerCase().includes(query);
+				});
 			});
 		</script>
 	</body>

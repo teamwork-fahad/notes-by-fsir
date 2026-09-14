@@ -1,0 +1,129 @@
+---
+import "../styles/site.css";
+
+interface Props {
+  notes: any[];
+  slug: string;
+  label: string;
+  title: string;
+  description: string;
+}
+
+const { notes, slug, label, title, description } = Astro.props;
+const sortedNotes = notes
+  .map((note) => ({
+    id: note.id,
+    title: note.data.title,
+    description: note.data.description,
+    chapter: note.data.chapter ?? "General",
+    author: note.data.author ?? "Fahad Sir",
+  }))
+  .sort((a, b) => a.title.localeCompare(b.title));
+
+const chapters = Array.from(
+  sortedNotes.reduce((groups, note) => {
+    const chapter = note.chapter.split(".")[0] || "General";
+    const items = groups.get(chapter) ?? [];
+    items.push(note);
+    groups.set(chapter, items);
+    return groups;
+  }, new Map<string, typeof sortedNotes>()),
+);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title} | Notes By FSir</title>
+    <meta name="description" content={description} />
+  </head>
+  <body>
+    <header class="navbar">
+      <a href="/" class="logo">Notes By <span>FSir</span></a>
+      <nav><a href="/">Home</a><a href="/#subjects">Subjects</a><a href="/#about">About</a></nav>
+      <div class="nav-actions">
+        <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">moon</button>
+        <a href="/login" class="back-btn">Login</a>
+      </div>
+    </header>
+
+    <main class="page-wrapper subject-index">
+      <div class="breadcrumb"><a href="/">Home</a><span>/</span><span>{label}</span></div>
+      <section class="header-section subject-hero">
+        <div>
+          <div class="brand-badge">{label} NOTES</div>
+          <h1>{title}</h1>
+          <p class="subtitle">{description}</p>
+        </div>
+        <div class="subject-stat"><strong>{sortedNotes.length}</strong><span>Total Notes</span></div>
+      </section>
+
+      <section class="subject-tools" aria-label={`Search and view ${label} notes`}>
+        <label class="subject-search">
+          <span>Search</span>
+          <input id="noteSearch" type="search" placeholder="Search notes by title..." aria-label="Search notes by title" />
+        </label>
+        <div class="view-toggle" role="group" aria-label="Choose notes view">
+          <button class="view-button active" data-view="grid" type="button">▦ Grid</button>
+          <button class="view-button" data-view="list" type="button">☷ List</button>
+        </div>
+      </section>
+
+      <section class="subject-chapters" id="chapterList">
+        {chapters.map(([chapter, items]) => (
+          <section class="chapter-block" data-chapter-card>
+            <div class="chapter-heading"><span>Chapter {chapter}</span><small>{items.length} notes</small></div>
+            <div class="notes-grid" data-notes-grid>
+              {items.map((note) => (
+                <a href={`/${slug}/${note.id}/`} class="note-card" data-note-link data-title={note.title.toLowerCase()}>
+                  <div class="card-meta"><span class="chapter-pill">{note.chapter}</span><span class="author-name">By {note.author}</span></div>
+                  <h3>{note.title}</h3>
+                  <p>{note.description ?? `Explore this ${label} topic with clear explanations and examples.`}</p>
+                  <div class="card-footer"><span class="read-btn">Read Note →</span></div>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+        <p class="subject-empty" id="emptyState" hidden>No notes found.</p>
+      </section>
+    </main>
+
+    <footer><div class="footer-logo">Notes By <span>FSir</span></div><p>Created by Fahad Sir</p><small>© 2026 Notes By FSir. All rights reserved.</small></footer>
+
+    <script>
+      const themeButton = document.getElementById("themeToggle");
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") document.body.classList.add("dark");
+      const updateThemeButton = () => { if (themeButton) themeButton.textContent = document.body.classList.contains("dark") ? "sun" : "moon"; };
+      updateThemeButton();
+      themeButton?.addEventListener("click", () => { document.body.classList.toggle("dark"); localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light"); updateThemeButton(); });
+
+      const searchInput = document.getElementById("noteSearch");
+      const chapterCards = Array.from(document.querySelectorAll("[data-chapter-card]"));
+      const emptyState = document.getElementById("emptyState");
+      searchInput?.addEventListener("input", () => {
+        const query = searchInput.value.trim().toLowerCase();
+        let visibleNotes = 0;
+        chapterCards.forEach((chapter) => {
+          const notes = Array.from(chapter.querySelectorAll("[data-note-link]"));
+          let visibleInChapter = 0;
+          notes.forEach((note) => { const visible = (note.getAttribute("data-title") || "").includes(query); note.hidden = !visible; if (visible) { visibleInChapter += 1; visibleNotes += 1; } });
+          chapter.hidden = visibleInChapter === 0;
+        });
+        if (emptyState) emptyState.hidden = visibleNotes > 0;
+      });
+
+      document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => {
+        const view = button.getAttribute("data-view");
+        document.querySelectorAll("[data-view]").forEach((item) => item.classList.toggle("active", item === button));
+        document.querySelectorAll("[data-notes-grid]").forEach((grid) => grid.classList.toggle("list-view", view === "list"));
+        localStorage.setItem("notes-view", view || "grid");
+      }));
+      const savedView = localStorage.getItem("notes-view");
+      if (savedView === "list") document.querySelector('[data-view="list"]')?.click();
+    </script>
+  </body>
+</html>
