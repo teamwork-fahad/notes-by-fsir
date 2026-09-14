@@ -80,6 +80,16 @@ const author = post.data.author ?? "Fahad Sir";
       window.addEventListener("scroll", updateProgress, { passive: true });
       updateProgress();
 
+      // Wrap tables automatically for responsive overflow & border handling
+      document.querySelectorAll(".content table").forEach((table) => {
+        if (table.parentElement?.classList.contains("table-wrapper")) return;
+        const wrapper = document.createElement("div");
+        wrapper.className = "table-wrapper";
+        table.parentNode?.insertBefore(wrapper, table);
+        wrapper.appendChild(table);
+      });
+
+      // Code Block Copy Buttons
       document.querySelectorAll(".content pre").forEach((pre) => {
         const code = pre.querySelector("code");
         if (!code || pre.parentElement?.classList.contains("code-block-container")) return;
@@ -90,6 +100,51 @@ const author = post.data.author ?? "Fahad Sir";
         button.addEventListener("click", async () => { await navigator.clipboard.writeText(code.innerText); button.textContent = "Copied"; setTimeout(() => { button.textContent = "Copy"; }, 1200); });
         header.append(label, button); pre.parentNode?.insertBefore(container, pre); container.append(header, pre);
       });
+
+      // Table of Contents Active Highlighting & Smooth Navigation
+      const tocLinks = Array.from(document.querySelectorAll<HTMLAnchorElement>(".toc-links a"));
+      if (tocLinks.length > 0) {
+        const headingsMap = tocLinks
+          .map((link) => {
+            const href = link.getAttribute("href");
+            const id = href && href.startsWith("#") ? href.substring(1) : null;
+            const target = id ? document.getElementById(id) : null;
+            return { link, target, id };
+          })
+          .filter((item): item is { link: HTMLAnchorElement; target: HTMLElement; id: string } => item.target !== null);
+
+        headingsMap.forEach(({ link, target, id }) => {
+          link.addEventListener("click", (e) => {
+            e.preventDefault();
+            const top = target.getBoundingClientRect().top + window.scrollY - 90;
+            window.scrollTo({ top, behavior: "smooth" });
+            history.pushState(null, "", `#${id}`);
+          });
+        });
+
+        const onScrollTOC = () => {
+          const scrollPos = window.scrollY + 120;
+          let current = null;
+
+          for (let i = 0; i < headingsMap.length; i++) {
+            const top = headingsMap[i].target.getBoundingClientRect().top + window.scrollY;
+            if (scrollPos >= top) {
+              current = headingsMap[i];
+            }
+          }
+
+          headingsMap.forEach((item) => {
+            if (current && item.id === current.id) {
+              item.link.classList.add("active");
+            } else {
+              item.link.classList.remove("active");
+            }
+          });
+        };
+
+        window.addEventListener("scroll", onScrollTOC, { passive: true });
+        onScrollTOC();
+      }
     </script>
   </body>
 </html>

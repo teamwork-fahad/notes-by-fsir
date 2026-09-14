@@ -161,11 +161,65 @@ h1, h2, h3 { font-family: "Space Grotesk", sans-serif; letter-spacing: 0; }
 .reading-progress { height: 3px; background: var(--line); }
 #progressBar { height: 100%; background: var(--coral); }
 .content { padding: 32px 46px 52px; color: var(--ink); font-size: 1.03rem; line-height: 1.8; }
-.content h1, .content h2, .content h3 { margin: 34px 0 12px; }
+.content h1, .content h2, .content h3, .content h4, .content h5, .content h6 { margin: 34px 0 12px; scroll-margin-top: 90px; }
 .content p, .content ul, .content ol { margin: 0 0 20px; }
 .content a { color: var(--teal); }
+
+/* Markdown Table Styles */
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin: 28px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+.content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.table-wrapper table {
+  margin: 0;
+  border: none;
+  border-radius: 0;
+}
+.content th,
+.content td {
+  padding: 12px 18px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.content th {
+  background-color: rgba(23, 109, 107, 0.08);
+  color: var(--teal);
+  font-family: "Space Grotesk", sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+body.dark .content th {
+  background-color: rgba(23, 109, 107, 0.22);
+  color: #4edcd8;
+}
+.content tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+body.dark .content tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+.content tr:hover {
+  background-color: rgba(232, 109, 82, 0.05);
+}
+
 .toc-sidebar { position: sticky; top: 24px; }
-.toc-card { padding: 20px; }
+.toc-card { padding: 20px; max-height: calc(100vh - 48px); overflow-y: auto; }
 .toc-card h3 { margin: 0 0 16px; font-size: 1rem; }
 .toc-card ul { list-style: none; margin: 0; padding: 0; }
 .toc-card li { margin-bottom: 10px; font-size: .84rem; }
@@ -173,10 +227,28 @@ h1, h2, h3 { font-family: "Space Grotesk", sans-serif; letter-spacing: 0; }
 .toc-card a:hover { color: var(--coral); }
 .toc-heading { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
 .toc-heading span { display: grid; width: 24px; height: 24px; place-items: center; border-radius: 50%; background: rgba(232, 109, 82, .12); color: var(--coral); font-size: .72rem; font-weight: 700; }
-.toc-links { display: grid; gap: 10px; padding-top: 16px; }
-.toc-links a { color: var(--muted); font-size: .84rem; line-height: 1.35; text-decoration: none; }
-.toc-links a:hover { color: var(--coral); }
-.toc-links .toc-subitem { padding-left: 12px; font-size: .78rem; }
+.toc-links { display: grid; gap: 6px; padding-top: 16px; }
+.toc-links a {
+  color: var(--muted);
+  font-size: .84rem;
+  line-height: 1.4;
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+.toc-links a:hover {
+  color: var(--coral);
+  background: rgba(232, 109, 82, 0.06);
+}
+.toc-links a.active {
+  color: var(--coral);
+  font-weight: 600;
+  border-left-color: var(--coral);
+  background: rgba(232, 109, 82, 0.09);
+}
+.toc-links .toc-subitem { margin-left: 10px; font-size: .78rem; }
 .toc-empty { color: var(--muted); font-size: .82rem; line-height: 1.5; }
 .end-note { display: flex; align-items: center; gap: 12px; margin: 0 46px 40px; border-top: 1px solid var(--line); color: var(--teal); padding-top: 22px; }
 .end-note strong { font-family: "Space Grotesk", sans-serif; }
@@ -204,6 +276,7 @@ body > footer p { margin: 0; }
   .page-wrapper { padding: 48px 0 64px; }
   .notes-grid { grid-template-columns: 1fr; }
   .article-header, .content { padding-inline: 22px; }
+  .content th, .content td { padding: 8px 12px; font-size: 0.86rem; }
   .end-note { margin-inline: 22px; }
   body > footer { display: block; }
   body > footer p { margin-top: 10px; }
