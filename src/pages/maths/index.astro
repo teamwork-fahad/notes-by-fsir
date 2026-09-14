@@ -1,14 +1,9 @@
 ---
-// Minimal index for maths notes
----
+import { getCollection } from "astro:content";
+import "../../styles/site.css";
 
-<script context="module">
-  import { getCollection } from "astro:content";
-  export async function get() {
-    const posts = await getCollection("maths");
-    return { props: { posts } };
-  }
-</script>
+const posts = await getCollection("maths");
+---
 
 <html>
   <head>
@@ -19,7 +14,7 @@
   <body>
     <h1>Maths Notes</h1>
     <ul>
-      {Astro.props.posts.map((p) => (
+      {posts.map((p) => (
         <li><a href={`/maths/${p.id}`}>{p.data.title}</a></li>
       ))}
     </ul>

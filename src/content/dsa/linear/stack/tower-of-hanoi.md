@@ -1,23 +1,20 @@
 ---
-title: 'Tower of Hanoi'
-description: 'Recursion example: Tower of Hanoi problem and solution analysis.'
-subject: dsa
-chapter: Recursion
-author: teamwork-fahad
+title: Tower of Hanoi
+description: Recursive puzzle solution using stack principles and call stack mechanics.
+sidebar:
+  order: 4
 ---
 
-## Recursion and Tower of Hanoi
+# Tower of Hanoi
 
-A recursive function calls itself with a smaller problem and must have a base case.
+Tower of Hanoi is a mathematical puzzle where disks are moved between three rods following strict size constraint rules.
 
 ```python
-def hanoi(disks, source, helper, destination):
-    if disks == 1:
-        print(source, '->', destination)
+def tower_of_hanoi(n, source, destination, auxiliary):
+    if n == 1:
+        print(f"Move disk 1 from {source} to {destination}")
         return
-    hanoi(disks - 1, source, destination, helper)
-    print(source, '->', destination)
-    hanoi(disks - 1, helper, source, destination)
+    tower_of_hanoi(n - 1, source, auxiliary, destination)
+    print(f"Move disk {n} from {source} to {destination}")
+    tower_of_hanoi(n - 1, auxiliary, destination, source)
 ```
-
-Tower of Hanoi requires $2^n - 1$ moves for `n` disks.

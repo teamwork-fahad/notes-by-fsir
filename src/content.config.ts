@@ -1,4 +1,5 @@
 import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 
 // Relaxed note schema: migrated content has variable frontmatter fields.
@@ -11,18 +12,24 @@ const noteSchema = z.object({
   author: z.string().optional(),
 });
 
+const noteCollection = (folder: string) =>
+  defineCollection({
+    loader: glob({ pattern: "**/*.{md,mdx}", base: `./src/content/${folder}` }),
+    schema: noteSchema,
+  });
+
 export const collections = {
-  php: defineCollection({ schema: noteSchema }),
-  python: defineCollection({ schema: noteSchema }),
-  java: defineCollection({ schema: noteSchema }),
-  cpp: defineCollection({ schema: noteSchema }),
-  c: defineCollection({ schema: noteSchema }),
-  mysql: defineCollection({ schema: noteSchema }),
-  dsa: defineCollection({ schema: noteSchema }),
-  html: defineCollection({ schema: noteSchema }),
-  css: defineCollection({ schema: noteSchema }),
-  js: defineCollection({ schema: noteSchema }),
-  maths: defineCollection({ schema: noteSchema }),
-  foc: defineCollection({ schema: noteSchema }),
-  docs: defineCollection({ schema: noteSchema }),
+  php: noteCollection("php"),
+  python: noteCollection("python"),
+  java: noteCollection("java"),
+  cpp: noteCollection("cpp"),
+  c: noteCollection("c"),
+  mysql: noteCollection("mysql"),
+  dsa: noteCollection("dsa"),
+  html: noteCollection("html"),
+  css: noteCollection("css"),
+  js: noteCollection("js"),
+  maths: noteCollection("maths"),
+  foc: noteCollection("foc"),
+  docs: noteCollection("docs"),
 };

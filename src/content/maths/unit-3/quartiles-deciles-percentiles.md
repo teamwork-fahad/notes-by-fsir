@@ -1,11 +1,6 @@
 ---
-title: Quartiles, Deciles and Percentiles
-description: Understanding quartiles, deciles, and percentiles.
-subject: maths
-chapter: Unit 3 - Quartiles
-author: teamwork-fahad
+title: '3.4 Quartiles, Deciles, and Percentiles'
+description: 'Measures that describe the position of an observation within a distribution.'
 ---
 
-# Quartiles, Deciles and Percentiles
-
-(Original content preserved.)
+Quartiles divide data into four parts, deciles into ten, and percentiles into one hundred. They describe the position of an observation within a distribution.

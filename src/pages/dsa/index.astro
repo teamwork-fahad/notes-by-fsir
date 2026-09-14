@@ -1,14 +1,9 @@
 ---
-// Minimal index page for a content collection. This file lists all notes in the collection.
----
+import { getCollection } from "astro:content";
+import "../../styles/site.css";
 
-<script context="module">
-  import { getCollection } from "astro:content";
-  export async function get() {
-    const posts = await getCollection("dsa");
-    return { props: { posts } };
-  }
-</script>
+const posts = await getCollection("dsa");
+---
 
 <html>
   <head>
@@ -19,7 +14,7 @@
   <body>
     <h1>DSA Notes</h1>
     <ul>
-      {Astro.props.posts.map((p) => (
+      {posts.map((p) => (
         <li><a href={`/dsa/${p.id}`}>{p.data.title}</a></li>
       ))}
     </ul>

@@ -1,5 +1,6 @@
 ---
 import { getCollection } from "astro:content";
+import "../../styles/site.css";
 
 const notes = await getCollection("cpp");
 
@@ -20,10 +21,10 @@ const sortedNotes = notes
 		title: note.data.title,
 		description: note.data.description,
 		subject: note.data.subject,
-		chapter: note.data.chapter,
+		chapter: note.data.chapter ?? "General",
 		author: note.data.author,
-		chapterGroup: getChapterNumber(note.data.chapter),
-		sortValue: getSortValue(note.data.chapter),
+		chapterGroup: getChapterNumber(note.data.chapter ?? "General"),
+		sortValue: getSortValue(note.data.chapter ?? "General"),
 	}))
 	.sort((a, b) => a.sortValue - b.sortValue || a.title.localeCompare(b.title));
 

@@ -1,14 +1,13 @@
 ---
 title: 'Linear Data Structures'
 description: 'Arrays, stacks, queues, linked lists, recursion, and polynomial manipulation.'
-subject: dsa
-chapter: Linear
-author: teamwork-fahad
+sidebar:
+  order: 3
 ---
 
 ## Array
 
-An array stores elements in contiguous memory. For a one-dimensional array, the address of element `i` can be calculated from the base address and element size. Arrays provide fast indexed access [...]
+An array stores elements in contiguous memory. For a one-dimensional array, the address of element `i` can be calculated from the base address and element size. Arrays provide fast indexed access and are useful for tables, buffers, and fixed-size collections.
 
 ## Stack
 
@@ -52,7 +51,7 @@ A linked list stores nodes connected by links rather than requiring contiguous m
 
 Types include singly, circular, doubly, circular doubly, and header linked lists. Typical operations are traversal, insertion, deletion, searching, and reversal.
 
-Linked lists are useful when frequent insertion and deletion are more important than direct indexed access. Polynomial expressions can be represented as nodes containing coefficient and exponent, [...]
+Linked lists are useful when frequent insertion and deletion are more important than direct indexed access. Polynomial expressions can be represented as nodes containing coefficient and exponent, then added by merging terms with equal exponents.
 
 ### Practice
 
