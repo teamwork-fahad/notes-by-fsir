@@ -1,12 +1,14 @@
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
 
+// Relaxed note schema: migrated content has variable frontmatter fields.
+// Make most fields optional to avoid build-time validation failures.
 const noteSchema = z.object({
   title: z.string(),
-  description: z.string(),
-  subject: z.string(),
-  chapter: z.string(),
-  author: z.string(),
+  description: z.string().optional(),
+  subject: z.string().optional(),
+  chapter: z.string().optional(),
+  author: z.string().optional(),
 });
 
 export const collections = {
