@@ -11,6 +11,7 @@ const javaNotes = await getCollection("java");
 const cppNotes = await getCollection("cpp");
 const cNotes = await getCollection("c");
 const mysqlNotes = await getCollection("mysql");
+const plsqlNotes = await getCollection("plsql");
 const dsaNotes = await getCollection("dsa");
 const htmlNotes = await getCollection("html");
 const cssNotes = await getCollection("css");
@@ -23,6 +24,7 @@ const subjects = [
 	{ name: "C++", count: cppNotes.length, icon: "💻" },
 	{ name: "C", count: cNotes.length, icon: "⚙️" },
 	{ name: "MySQL", count: mysqlNotes.length, icon: "🗄️" },
+	{ name: "PL/SQL", count: plsqlNotes.length, icon: "⚡" },
 	{ name: "DSA", count: dsaNotes.length, icon: "🌳" },
 	{ name: "HTML", count: htmlNotes.length, icon: "🌐" },
 	{ name: "CSS", count: cssNotes.length, icon: "🎨" },
@@ -36,6 +38,7 @@ const allNotes = [
 	...javaNotes,
 	...cNotes,
 	...mysqlNotes,
+	...plsqlNotes,
 	...dsaNotes,
 	...htmlNotes,
 	...cssNotes,

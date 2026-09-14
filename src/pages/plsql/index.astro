@@ -1,0 +1,12 @@
+---
+import { getCollection } from "astro:content";
+import SubjectIndex from "../../components/SubjectIndex.astro";
+import { getSubjectBySlug } from "../../lib/subjects";
+
+const meta = getSubjectBySlug("plsql");
+if (!meta || meta.published === false) {
+  return Astro.redirect("/");
+}
+const notes = await getCollection("plsql");
+---
+<SubjectIndex notes={notes} slug="plsql" label={meta.name} title={meta.name} description={meta.description} />

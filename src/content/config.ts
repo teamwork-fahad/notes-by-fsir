@@ -19,6 +19,7 @@ export const collections = {
   cpp: defineCollection({ schema: noteSchema }),
   c: defineCollection({ schema: noteSchema }),
   mysql: defineCollection({ schema: noteSchema }),
+  plsql: defineCollection({ schema: noteSchema }),
   dsa: defineCollection({ schema: noteSchema }),
   html: defineCollection({ schema: noteSchema }),
   css: defineCollection({ schema: noteSchema }),

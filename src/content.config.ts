@@ -27,6 +27,7 @@ export const collections = {
   cpp: noteCollection("cpp"),
   c: noteCollection("c"),
   mysql: noteCollection("mysql"),
+  plsql: noteCollection("plsql"),
   dsa: noteCollection("dsa"),
   html: noteCollection("html"),
   css: noteCollection("css"),

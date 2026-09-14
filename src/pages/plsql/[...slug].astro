@@ -1,0 +1,7 @@
+---
+import { getCollection, render } from "astro:content";
+import NoteReader from "../../components/NoteReader.astro";
+export async function getStaticPaths() { const posts = await getCollection("plsql"); return posts.map((post) => ({ params: { slug: post.id }, props: { post } })); }
+const { post } = Astro.props; const { Content, headings } = await render(post);
+---
+<NoteReader post={post} content={Content} headings={headings} slug="plsql" label="PL/SQL" />

@@ -190,5 +190,13 @@
     "path": "reference",
     "order": 2,
     "published": true
+  },
+  {
+    "subject": "plsql",
+    "id": "unit-3",
+    "title": "Unit 3: Oracle Tools and Utilities",
+    "path": "unit-3",
+    "order": 1,
+    "published": true
   }
 ]

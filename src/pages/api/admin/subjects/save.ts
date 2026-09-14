@@ -8,7 +8,7 @@ import type { SubjectMeta } from "../../../../lib/subjects";
 export const prerender = false;
 
 const ALLOWED_COLLECTIONS = new Set([
-  "php", "python", "java", "cpp", "c", "mysql", "dsa", "html", "css", "js", "maths", "foc", "docs"
+  "php", "python", "java", "cpp", "c", "mysql", "plsql", "dsa", "html", "css", "js", "maths", "foc", "docs"
 ]);
 
 export const POST: APIRoute = async ({ request }) => {

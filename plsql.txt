@@ -1,0 +1,8 @@
+Unit – 3: Oracle Tools and Utilities
+3.1 SQL
+3.2 PL/SQL Procedural Extension
+3.2.1 Overview, PL/SQL Data Types & Control Structures
+3.2.2 Cursors
+3.2.3 Stored Procedures & Functions
+3.2.4 Database Triggers
+3.2.5 Package Creation
