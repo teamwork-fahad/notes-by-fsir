@@ -1,0 +1,15 @@
+---
+import { getCollection, render } from "astro:content";
+import NoteReader from "../../components/NoteReader.astro";
+import { getSubjectBySlug } from "../../lib/subjects";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("c");
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const meta = getSubjectBySlug("c");
+---
+<NoteReader post={post} content={Content} headings={headings} slug="c" label={meta?.name ?? "C Programming"} />

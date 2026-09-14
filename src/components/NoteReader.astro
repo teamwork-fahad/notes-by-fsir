@@ -10,7 +10,8 @@ interface Props {
 }
 
 const { post, content: Content, headings, slug, label } = Astro.props;
-const tocItems = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const isUnpublished = post.data.published === false;
+const tocItems = headings ? headings.filter((heading) => heading.depth === 2 || heading.depth === 3) : [];
 const chapter = post.data.chapter ?? "General";
 const author = post.data.author ?? "Fahad Sir";
 ---
@@ -29,31 +30,40 @@ const author = post.data.author ?? "Fahad Sir";
       <nav><a href="/">Home</a><a href="/#subjects">Subjects</a><a href="/#about">About</a></nav>
       <div class="nav-actions">
         <button id="themeToggle" class="theme-btn" aria-label="Toggle theme">moon</button>
-        <a href="/{slug}" class="back-btn">Back to {label}</a>
+        <a href={`/${slug}`} class="back-btn">Back to {label}</a>
       </div>
     </header>
 
     <main class="page-wrapper note-reader">
       <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href={`/${slug}`}>{label}</a><span>/</span><span>{post.data.title}</span></div>
-      <div class="layout">
-        <article class="article">
-          <header class="article-header">
-            <div class="article-meta"><span class="subject-badge">{label} · {chapter}</span><span class="author">By {author}</span></div>
-            <h1>{post.data.title}</h1>
-            {post.data.description && <p class="description">{post.data.description}</p>}
-          </header>
-          <div class="reading-progress"><div id="progressBar"></div></div>
-          <div class="content"><Content /></div>
-          <div class="end-note"><strong>Topic completed</strong><span>Keep learning and practicing.</span></div>
-        </article>
+      
+      {isUnpublished ? (
+        <div style="max-width: 800px; margin: 40px auto; padding: 32px; background: #fff8e6; border: 1px solid #ffe8b3; border-radius: 16px; text-align: center; color: #8a6d3b;">
+          <h2>🔒 Draft Note (Unpublished)</h2>
+          <p style="margin-top: 10px; font-size: 15px;">This note is currently unpublished by the Administrator and is not available for public reading.</p>
+          <a href={`/${slug}`} class="back-btn" style="display: inline-block; margin-top: 20px; text-decoration: none;">← Return to {label} Index</a>
+        </div>
+      ) : (
+        <div class="layout">
+          <article class="article">
+            <header class="article-header">
+              <div class="article-meta"><span class="subject-badge">{label} · {chapter}</span><span class="author">By {author}</span></div>
+              <h1>{post.data.title}</h1>
+              {post.data.description && <p class="description">{post.data.description}</p>}
+            </header>
+            <div class="reading-progress"><div id="progressBar"></div></div>
+            <div class="content"><Content /></div>
+            <div class="end-note"><strong>Topic completed</strong><span>Keep learning and practicing.</span></div>
+          </article>
 
-        <aside class="toc-sidebar">
-          <div class="toc-card">
-            <div class="toc-heading"><strong>On this page</strong><span>{tocItems.length}</span></div>
-            {tocItems.length > 0 ? <nav class="toc-links">{tocItems.map((item) => <a class:list={{ "toc-subitem": item.depth === 3 }} href={`#${item.slug}`}>{item.text}</a>)}</nav> : <p class="toc-empty">This note has no sections yet.</p>}
-          </div>
-        </aside>
-      </div>
+          <aside class="toc-sidebar">
+            <div class="toc-card">
+              <div class="toc-heading"><strong>On this page</strong><span>{tocItems.length}</span></div>
+              {tocItems.length > 0 ? <nav class="toc-links">{tocItems.map((item) => <a class:list={{ "toc-subitem": item.depth === 3 }} href={`#${item.slug}`}>{item.text}</a>)}</nav> : <p class="toc-empty">This note has no sections yet.</p>}
+            </div>
+          </aside>
+        </div>
+      )}
     </main>
 
     <footer><div class="footer-logo">Notes By <span>FSir</span></div><p>Created by Fahad Sir</p><small>© 2026 Notes By FSir. All rights reserved.</small></footer>

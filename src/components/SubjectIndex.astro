@@ -1,5 +1,6 @@
 ---
 import "../styles/site.css";
+import { getChaptersBySubject, getChapterTitle } from "../lib/chapters";
 
 interface Props {
   notes: any[];
@@ -11,24 +12,48 @@ interface Props {
 
 const { notes, slug, label, title, description } = Astro.props;
 const sortedNotes = notes
+  .filter((note) => note.data.published !== false)
   .map((note) => ({
     id: note.id,
     title: note.data.title,
     description: note.data.description,
     chapter: note.data.chapter ?? "General",
     author: note.data.author ?? "Fahad Sir",
+    order: note.data.order,
   }))
-  .sort((a, b) => a.title.localeCompare(b.title));
+  .sort((a, b) => {
+    const hasA = typeof a.order === "number";
+    const hasB = typeof b.order === "number";
+    if (hasA && hasB) {
+      if (a.order !== b.order) return a.order! - b.order!;
+    }
+    if (hasA && !hasB) return -1;
+    if (!hasA && hasB) return 1;
+    return a.title.localeCompare(b.title);
+  });
 
-const chapters = Array.from(
-  sortedNotes.reduce((groups, note) => {
-    const chapter = note.chapter.split(".")[0] || "General";
-    const items = groups.get(chapter) ?? [];
-    items.push(note);
-    groups.set(chapter, items);
-    return groups;
-  }, new Map<string, typeof sortedNotes>()),
-);
+const subjectChaptersMeta = getChaptersBySubject(slug);
+
+const chaptersMap = sortedNotes.reduce((groups, note) => {
+  const pathParts = note.id.split("/");
+  const pathChapter = pathParts.length > 1 ? pathParts[0] : null;
+  const rawChapter = pathChapter ?? note.chapter;
+  const displayTitle = getChapterTitle(slug, rawChapter);
+
+  const items = groups.get(displayTitle) ?? [];
+  items.push({ ...note, displayChapter: displayTitle });
+  groups.set(displayTitle, items);
+  return groups;
+}, new Map<string, (typeof sortedNotes[number] & { displayChapter?: string })[]>());
+
+const chapters = Array.from(chaptersMap.entries()).sort(([titleA], [titleB]) => {
+  const metaA = subjectChaptersMeta.find((c) => c.title === titleA);
+  const metaB = subjectChaptersMeta.find((c) => c.title === titleB);
+  if (metaA && metaB) return metaA.order - metaB.order;
+  if (metaA) return -1;
+  if (metaB) return 1;
+  return titleA.localeCompare(titleB);
+});
 ---
 
 <!doctype html>
@@ -74,7 +99,7 @@ const chapters = Array.from(
       <section class="subject-chapters" id="chapterList">
         {chapters.map(([chapter, items]) => (
           <section class="chapter-block" data-chapter-card>
-            <div class="chapter-heading"><span>Chapter {chapter}</span><small>{items.length} notes</small></div>
+            <div class="chapter-heading"><span>{chapter.startsWith("Unit") || chapter.startsWith("Chapter") || chapter === "General" ? chapter : `Chapter: ${chapter}`}</span><small>{items.length} {items.length === 1 ? "note" : "notes"}</small></div>
             <div class="notes-grid" data-notes-grid>
               {items.map((note) => (
                 <a href={`/${slug}/${note.id}/`} class="note-card" data-note-link data-title={note.title.toLowerCase()}>
@@ -101,7 +126,7 @@ const chapters = Array.from(
       updateThemeButton();
       themeButton?.addEventListener("click", () => { document.body.classList.toggle("dark"); localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light"); updateThemeButton(); });
 
-      const searchInput = document.getElementById("noteSearch");
+      const searchInput = document.getElementById("noteSearch") as HTMLInputElement | null;
       const chapterCards = Array.from(document.querySelectorAll("[data-chapter-card]"));
       const emptyState = document.getElementById("emptyState");
       searchInput?.addEventListener("input", () => {
@@ -110,8 +135,8 @@ const chapters = Array.from(
         chapterCards.forEach((chapter) => {
           const notes = Array.from(chapter.querySelectorAll("[data-note-link]"));
           let visibleInChapter = 0;
-          notes.forEach((note) => { const visible = (note.getAttribute("data-title") || "").includes(query); note.hidden = !visible; if (visible) { visibleInChapter += 1; visibleNotes += 1; } });
-          chapter.hidden = visibleInChapter === 0;
+          notes.forEach((note) => { const visible = (note.getAttribute("data-title") || "").includes(query); (note as HTMLElement).hidden = !visible; if (visible) { visibleInChapter += 1; visibleNotes += 1; } });
+          (chapter as HTMLElement).hidden = visibleInChapter === 0;
         });
         if (emptyState) emptyState.hidden = visibleNotes > 0;
       });
@@ -123,7 +148,7 @@ const chapters = Array.from(
         localStorage.setItem("notes-view", view || "grid");
       }));
       const savedView = localStorage.getItem("notes-view");
-      if (savedView === "list") document.querySelector('[data-view="list"]')?.click();
+      if (savedView === "list") (document.querySelector('[data-view="list"]') as HTMLElement | null)?.click();
     </script>
   </body>
 </html>

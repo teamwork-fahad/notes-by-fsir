@@ -3,12 +3,11 @@ import { getCollection } from "astro:content";
 import SubjectIndex from "../../components/SubjectIndex.astro";
 import { getSubjectBySlug } from "../../lib/subjects";
 
-const meta = getSubjectBySlug("foc");
+const meta = getSubjectBySlug("java");
 if (!meta || meta.published === false) {
   return Astro.redirect("/");
 }
-const notes = await getCollection("foc");
+const notes = await getCollection("java");
 ---
-<SubjectIndex notes={notes} slug="foc" label={meta.name} title={meta.name} description={meta.description} />
-
+<SubjectIndex notes={notes} slug="java" label={meta.name} title={meta.name} description={meta.description} />
 

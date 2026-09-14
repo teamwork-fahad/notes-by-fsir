@@ -10,6 +10,8 @@ const noteSchema = z.object({
   subject: z.string().optional(),
   chapter: z.string().optional(),
   author: z.string().optional(),
+  order: z.number().optional(),
+  published: z.boolean().optional().default(true),
 });
 
 const noteCollection = (folder: string) =>

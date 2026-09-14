@@ -1,0 +1,194 @@
+[
+  {
+    "subject": "dsa",
+    "id": "linear",
+    "title": "Linear Data Structures",
+    "path": "linear",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "dsa",
+    "id": "non-linear",
+    "title": "Non-Linear Data Structures",
+    "path": "non-linear",
+    "order": 2,
+    "published": true
+  },
+  {
+    "subject": "dsa",
+    "id": "searching",
+    "title": "Searching Algorithms",
+    "path": "searching",
+    "order": 3,
+    "published": true
+  },
+  {
+    "subject": "dsa",
+    "id": "sorting",
+    "title": "Sorting Algorithms",
+    "path": "sorting",
+    "order": 4,
+    "published": true
+  },
+  {
+    "subject": "python",
+    "id": "oop",
+    "title": "Object-Oriented Programming",
+    "path": "oop",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "python",
+    "id": "numpy",
+    "title": "NumPy & Data Analysis",
+    "path": "numpy",
+    "order": 2,
+    "published": true
+  },
+  {
+    "subject": "php",
+    "id": "oop",
+    "title": "Object-Oriented Programming",
+    "path": "oop",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "cpp",
+    "id": "oop",
+    "title": "Object-Oriented Programming",
+    "path": "oop",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "java",
+    "id": "oop",
+    "title": "Object-Oriented Programming",
+    "path": "oop",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "mysql",
+    "id": "exercise",
+    "title": "Exercises & Practice",
+    "path": "exercise",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "mysql",
+    "id": "sqlite",
+    "title": "SQLite Practice",
+    "path": "sqlite",
+    "order": 2,
+    "published": true
+  },
+  {
+    "subject": "js",
+    "id": "angular",
+    "title": "Angular Framework",
+    "path": "angular",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "maths",
+    "id": "unit-1",
+    "title": "Unit 1: Set Theory & Functions",
+    "path": "unit-1",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "maths",
+    "id": "unit-2",
+    "title": "Unit 2: Logic & Proofs",
+    "path": "unit-2",
+    "order": 2,
+    "published": true
+  },
+  {
+    "subject": "maths",
+    "id": "unit-3",
+    "title": "Unit 3: Matrices & Determinants",
+    "path": "unit-3",
+    "order": 3,
+    "published": true
+  },
+  {
+    "subject": "maths",
+    "id": "unit-4",
+    "title": "Unit 4: Graph Theory",
+    "path": "unit-4",
+    "order": 4,
+    "published": true
+  },
+  {
+    "subject": "maths",
+    "id": "unit-5",
+    "title": "Unit 5: Statistics & Probability",
+    "path": "unit-5",
+    "order": 5,
+    "published": true
+  },
+  {
+    "subject": "foc",
+    "id": "unit-1",
+    "title": "Unit 1: Computer Fundamentals",
+    "path": "unit-1",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "foc",
+    "id": "unit-2",
+    "title": "Unit 2: Hardware & Architecture",
+    "path": "unit-2",
+    "order": 2,
+    "published": true
+  },
+  {
+    "subject": "foc",
+    "id": "unit-3",
+    "title": "Unit 3: Operating Systems",
+    "path": "unit-3",
+    "order": 3,
+    "published": true
+  },
+  {
+    "subject": "foc",
+    "id": "unit-4",
+    "title": "Unit 4: Software & Networks",
+    "path": "unit-4",
+    "order": 4,
+    "published": true
+  },
+  {
+    "subject": "foc",
+    "id": "unit-5",
+    "title": "Unit 5: Data Communications",
+    "path": "unit-5",
+    "order": 5,
+    "published": true
+  },
+  {
+    "subject": "docs",
+    "id": "guides",
+    "title": "Guides & Tutorials",
+    "path": "guides",
+    "order": 1,
+    "published": true
+  },
+  {
+    "subject": "docs",
+    "id": "reference",
+    "title": "Reference Material",
+    "path": "reference",
+    "order": 2,
+    "published": true
+  }
+]

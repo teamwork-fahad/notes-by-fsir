@@ -64,13 +64,23 @@ const config = getSupabaseConfig();
 				<div class="alert success hidden" id="successAlert"></div>
 
 				<form id="loginForm" class="login-form">
+					<div class="form-group hidden" id="fullNameGroup">
+						<label for="fullName">Full Name</label>
+						<input
+							type="text"
+							id="fullName"
+							name="fullName"
+							placeholder="e.g. Fahad Vohra"
+						/>
+					</div>
+
 					<div class="form-group">
 						<label for="email">Email Address</label>
 						<input
 							type="email"
 							id="email"
 							name="email"
-							placeholder="e.g. fahad@fsir.com or student@fsir.com"
+							placeholder="e.g. student@fsir.com"
 							required
 						/>
 					</div>
@@ -83,6 +93,18 @@ const config = getSupabaseConfig();
 							name="password"
 							placeholder="Enter your password"
 							required
+							minlength="6"
+						/>
+					</div>
+
+					<div class="form-group hidden" id="confirmPasswordGroup">
+						<label for="confirmPassword">Confirm Password</label>
+						<input
+							type="password"
+							id="confirmPassword"
+							name="confirmPassword"
+							placeholder="Re-enter your password"
+							minlength="6"
 						/>
 					</div>
 
@@ -98,19 +120,6 @@ const config = getSupabaseConfig();
 						</button>
 					</div>
 				</form>
-
-				<!-- SECRET ADMIN ACCESS BOX -->
-				<div class="secret-admin-box" style="margin-top: 20px; padding: 16px; background: rgba(79, 70, 229, 0.05); border: 1px dashed var(--primary-color, #4f46e5); border-radius: 12px; text-align: center;">
-					<h4 style="margin-bottom: 6px; font-size: 14px; color: var(--primary-color, #4f46e5); font-weight: 600;">🔑 Quick Admin Secret Access</h4>
-					<p style="font-size: 12px; opacity: 0.8; margin-bottom: 10px;">Enter Secret Code to preview Admin Dashboard directly.</p>
-					<div style="display: flex; gap: 8px; justify-content: center;">
-						<input type="password" id="secretPasscode" placeholder="Enter Secret Code" style="padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; width: 160px; outline: none;" />
-						<button type="button" id="secretAdminBtn" style="padding: 8px 14px; background: #4f46e5; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
-							Unlock Admin 🚀
-						</button>
-					</div>
-					<div id="secretError" style="color: #dc3545; font-size: 12px; margin-top: 6px; display: none;"></div>
-				</div>
 
 				<!-- STUDENT NOTICE -->
 				<div class="student-info-box">
@@ -152,6 +161,8 @@ const config = getSupabaseConfig();
 			let isSignUpMode = false;
 			const signupToggleBtn = document.getElementById("signupToggleBtn");
 			const loginBtn = document.getElementById("loginBtn");
+			const fullNameGroup = document.getElementById("fullNameGroup");
+			const confirmPasswordGroup = document.getElementById("confirmPasswordGroup");
 
 			signupToggleBtn?.addEventListener("click", () => {
 				isSignUpMode = !isSignUpMode;
@@ -159,6 +170,14 @@ const config = getSupabaseConfig();
 					loginBtn.querySelector("span").textContent = isSignUpMode ? "Create Account" : "Login";
 				}
 				signupToggleBtn.textContent = isSignUpMode ? "Already have an account? Login" : "Need an Account? Sign Up";
+
+				if (isSignUpMode) {
+					fullNameGroup?.classList.remove("hidden");
+					confirmPasswordGroup?.classList.remove("hidden");
+				} else {
+					fullNameGroup?.classList.add("hidden");
+					confirmPasswordGroup?.classList.add("hidden");
+				}
 			});
 
 			// Supabase Initialization & Login Logic
@@ -190,7 +209,6 @@ const config = getSupabaseConfig();
 
 				const { data: { session } } = await supabase.auth.getSession();
 				if (session) {
-					// User is already logged in, show session controls instead of forced redirect
 					showExistingSessionUI(session.user);
 				}
 			}
@@ -202,11 +220,22 @@ const config = getSupabaseConfig();
 
 				const { data: profile } = await supabase
 					.from("profiles")
-					.select("role")
+					.select("role, is_blocked, full_name")
 					.eq("id", user.id)
 					.single();
 
+				if (profile?.is_blocked) {
+					await supabase.auth.signOut();
+					const errorAlert = document.getElementById("errorAlert");
+					if (errorAlert) {
+						errorAlert.textContent = "Your account has been blocked by an administrator. Please contact support.";
+						errorAlert.classList.remove("hidden");
+					}
+					return;
+				}
+
 				const role = profile?.role ? profile.role.trim().toLowerCase() : "student";
+				const displayName = profile?.full_name || user.email;
 
 				if (loginForm) loginForm.style.display = "none";
 
@@ -215,9 +244,8 @@ const config = getSupabaseConfig();
 					successAlert.innerHTML = `
 						<div style="text-align: center; padding: 8px 0;">
 							<p style="margin-bottom: 8px; font-size: 15px;">
-								Currently logged in as <strong>${user.email}</strong> (<strong>${role.toUpperCase()}</strong>).
+								Currently logged in as <strong>${displayName}</strong> (<strong>${role.toUpperCase()}</strong>).
 							</p>
-							${role !== 'admin' ? `<p style="font-size: 12px; margin-bottom: 12px; opacity: 0.9;">(Note: To make <strong>${user.email}</strong> an Admin, run the SQL update query in Supabase SQL Editor).</p>` : ''}
 							<div style="display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap;">
 								<a href="${role === 'admin' ? '/admin' : '/'}" class="submit-btn" style="text-decoration: none; display: inline-block; width: auto; padding: 8px 16px; font-size: 14px;">
 									${role === 'admin' ? 'Go to Admin Dashboard →' : 'Go to Home Page →'}
@@ -242,14 +270,49 @@ const config = getSupabaseConfig();
 				const errorAlert = document.getElementById("errorAlert");
 				const successAlert = document.getElementById("successAlert");
 
+				// 1. Check if user email is verified
+				if (user && !user.email_confirmed_at) {
+					await supabase.auth.signOut();
+					if (errorAlert) {
+						errorAlert.innerHTML = `
+							<strong>✉️ Email Verification Required:</strong>
+							<p>A verification email was sent to <strong>${user.email}</strong>. Please check your inbox and click the link before logging in.</p>
+							<button type="button" id="resendEmailBtn" style="margin-top: 10px; padding: 6px 14px; background: #5b4bdb; color: #fff; border: none; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+								📨 Resend Verification Email
+							</button>
+						`;
+						errorAlert.classList.remove("hidden");
+
+						document.getElementById("resendEmailBtn")?.addEventListener("click", async () => {
+							try {
+								const { error } = await supabase.auth.resend({
+									type: 'signup',
+									email: user.email,
+								});
+								if (error) throw error;
+								alert(`Verification email resent to ${user.email}! Please check your inbox.`);
+							} catch (resendErr) {
+								alert("Failed to resend verification email: " + resendErr.message);
+							}
+						});
+					}
+					return;
+				}
+
+				// 2. Fetch User Profile
 				const { data: profile, error } = await supabase
 					.from("profiles")
-					.select("role")
+					.select("role, is_blocked")
 					.eq("id", user.id)
 					.single();
 
-				if (error && error.code !== "PGRST116") {
-					console.warn("Profile fetch warning:", error);
+				if (profile?.is_blocked) {
+					await supabase.auth.signOut();
+					if (errorAlert) {
+						errorAlert.textContent = "Your account has been blocked by an administrator. Please contact support.";
+						errorAlert.classList.remove("hidden");
+					}
+					return;
 				}
 
 				const role = profile?.role ? profile.role.trim().toLowerCase() : "student";
@@ -259,8 +322,8 @@ const config = getSupabaseConfig();
 						successAlert.textContent = `Logged in successfully as ADMIN! Redirecting to Admin Dashboard...`;
 						successAlert.className = "alert success";
 					} else {
-						successAlert.innerHTML = `Logged in as <strong>STUDENT</strong>. Redirecting to home... <br/><small>(Note: To make <strong>${user.email}</strong> an Admin, run the SQL update query in Supabase SQL Editor).</small>`;
-						successAlert.className = "alert warning";
+						successAlert.innerHTML = `Logged in successfully as <strong>STUDENT</strong>. Redirecting to home page...`;
+						successAlert.className = "alert success";
 					}
 					successAlert.classList.remove("hidden");
 				}
@@ -298,21 +361,41 @@ const config = getSupabaseConfig();
 
 				try {
 					if (isSignUpMode) {
+						const fullName = document.getElementById("fullName").value.trim();
+						const confirmPassword = document.getElementById("confirmPassword").value;
+
+						if (!fullName) {
+							throw new Error("Please enter your Full Name.");
+						}
+
+						if (password !== confirmPassword) {
+							throw new Error("Passwords do not match. Please try again.");
+						}
+
 						const { data, error } = await supabase.auth.signUp({
 							email,
-							password
+							password,
+							options: {
+								data: { full_name: fullName },
+								emailRedirectTo: `${window.location.origin}/login`,
+							}
 						});
 
 						if (error) throw error;
 
-						if (successAlert) {
-							successAlert.textContent = "Account created successfully! Logging you in...";
-							successAlert.classList.remove("hidden");
-						}
-
-						if (data.user) {
+						if (data.user && !data.user.email_confirmed_at) {
+							if (successAlert) {
+								successAlert.innerHTML = `
+									<strong>🎉 Account Registration Successful!</strong>
+									<p style="margin-top: 6px;">A verification email has been sent to <strong>${email}</strong>. Please check your inbox and click the link to verify your email before logging in.</p>
+								`;
+								successAlert.className = "alert success";
+								successAlert.classList.remove("hidden");
+							}
+						} else if (data.user) {
 							await fetchRoleAndRedirect(data.user);
 						}
+
 					} else {
 						const { data, error } = await supabase.auth.signInWithPassword({
 							email,
@@ -365,7 +448,7 @@ const config = getSupabaseConfig();
 				try {
 					if (forgotBtn) forgotBtn.disabled = true;
 					const { error } = await supabase.auth.resetPasswordForEmail(email, {
-						redirectTo: `${window.location.origin}/login`,
+						redirectTo: `${window.location.origin}/reset-password`,
 					});
 					if (error) throw error;
 
@@ -381,24 +464,6 @@ const config = getSupabaseConfig();
 					}
 				} finally {
 					if (forgotBtn) forgotBtn.disabled = false;
-				}
-			});
-
-			const secretAdminBtn = document.getElementById("secretAdminBtn");
-			secretAdminBtn?.addEventListener("click", () => {
-				const codeInput = document.getElementById("secretPasscode");
-				const secretError = document.getElementById("secretError");
-				const code = codeInput?.value.trim();
-
-				if (code === "324232") {
-					localStorage.setItem("admin_secret_pass", "324232");
-					if (secretError) secretError.style.display = "none";
-					window.location.href = "/admin";
-				} else {
-					if (secretError) {
-						secretError.textContent = "Incorrect Secret Code! Please enter 324232";
-						secretError.style.display = "block";
-					}
 				}
 			});
 		</script>

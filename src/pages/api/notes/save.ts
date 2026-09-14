@@ -6,11 +6,7 @@ import { saveFileToGitHub, getGitHubConfig } from "../../../lib/github";
 
 export const prerender = false;
 
-async function verifyAdminAuth(authHeader: string | null, request?: Request) {
-  if (request && request.headers.get("x-admin-secret") === "324232") {
-    return { authorized: true, user: { email: "fahadvohra143@gmail.com" } };
-  }
-
+async function verifyAdminAuth(authHeader: string | null) {
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return { authorized: false, error: "Missing authorization bearer token." };
   }
@@ -39,9 +35,9 @@ async function verifyAdminAuth(authHeader: string | null, request?: Request) {
     return { authorized: false, error: "User authentication failed." };
   }
 
-  // 2. Query Profiles Table to verify Admin Role
+  // 2. Query Profiles Table to verify Admin Role & Block Status
   const profileRes = await fetch(
-    `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=role`,
+    `${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}&select=role,is_blocked`,
     {
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -57,6 +53,10 @@ async function verifyAdminAuth(authHeader: string | null, request?: Request) {
   const profiles = await profileRes.json();
   const profile = profiles?.[0];
 
+  if (profile?.is_blocked) {
+    return { authorized: false, error: "Account Blocked: Access denied." };
+  }
+
   if (!profile || profile.role?.trim().toLowerCase() !== "admin") {
     return { authorized: false, error: "Unauthorized access: Only authenticated Admin users can save notes." };
   }
@@ -68,7 +68,7 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // SECURITY GUARD: Verify Admin Authorization
     const authHeader = request.headers.get("Authorization");
-    const authResult = await verifyAdminAuth(authHeader, request);
+    const authResult = await verifyAdminAuth(authHeader);
 
     if (!authResult.authorized) {
       return new Response(
@@ -78,7 +78,7 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const bodyData = await request.json();
-    const { filename, title, description, subject, chapter, author, body: markdownBody, sha } = bodyData;
+    const { filename, title, description, subject, chapter, author, body: markdownBody, sha, order, published } = bodyData;
 
     if (!title || !subject || !chapter || !filename) {
       return new Response(
@@ -89,7 +89,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Clean safe filename formatting
     let cleanFilename = filename.trim().toLowerCase();
-    if (!cleanFilename.endsWith(".md")) {
+    if (!cleanFilename.endsWith(".md") && !cleanFilename.endsWith(".mdx")) {
       cleanFilename += ".md";
     }
 
@@ -99,13 +99,23 @@ export const POST: APIRoute = async ({ request }) => {
 
     const filePath = `src/content/${targetSubject}/${cleanFilename}`;
 
+    let orderLine = "";
+    if (typeof order === "number" && !isNaN(order)) {
+      orderLine = `\norder: ${order}`;
+    }
+
+    let publishedLine = "";
+    if (typeof published === "boolean") {
+      publishedLine = `\npublished: ${published}`;
+    }
+
     // Format clean Frontmatter & Content
     const frontmatter = `---
 title: "${title.replace(/"/g, '\\"')}"
 description: "${(description || "").replace(/"/g, '\\"')}"
 subject: "${subject}"
 chapter: "${chapter}"
-author: "${author || "Fahad Sir"}"
+author: "${author || "Fahad Sir"}"${orderLine}${publishedLine}
 ---
 
 ${markdownBody || ""}`;

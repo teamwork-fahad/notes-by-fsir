@@ -1,6 +1,14 @@
 ---
 import { getCollection } from "astro:content";
 import SubjectIndex from "../../components/SubjectIndex.astro";
+import { getSubjectBySlug } from "../../lib/subjects";
+
+const meta = getSubjectBySlug("js");
+if (!meta || meta.published === false) {
+  return Astro.redirect("/");
+}
 const notes = await getCollection("js");
 ---
-<SubjectIndex notes={notes} slug="js" label="JavaScript" title="JavaScript Development" description="Learn JavaScript concepts, browser APIs, and Angular fundamentals with practical notes." />
+<SubjectIndex notes={notes} slug="js" label={meta.name} title={meta.name} description={meta.description} />
+
+

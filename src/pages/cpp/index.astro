@@ -1,6 +1,14 @@
 ---
 import { getCollection } from "astro:content";
 import SubjectIndex from "../../components/SubjectIndex.astro";
+import { getSubjectBySlug } from "../../lib/subjects";
+
+const meta = getSubjectBySlug("cpp");
+if (!meta || meta.published === false) {
+  return Astro.redirect("/");
+}
 const notes = await getCollection("cpp");
 ---
-<SubjectIndex notes={notes} slug="cpp" label="C++" title="C++ Programming" description="Learn C++ concepts, OOP, syntax, programs, and practical examples by Fahad Sir." />
+<SubjectIndex notes={notes} slug="cpp" label={meta.name} title={meta.name} description={meta.description} />
+
+

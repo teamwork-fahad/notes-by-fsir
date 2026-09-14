@@ -1,9 +1,13 @@
 ---
 import { getSupabaseConfig } from "../../../lib/supabase";
 import { getGitHubConfig } from "../../../lib/github";
+import { getAllSubjects } from "../../../lib/subjects";
+import { getAllChapters } from "../../../lib/chapters";
 
 const config = getSupabaseConfig();
 const githubConfig = getGitHubConfig();
+const allSubjects = getAllSubjects();
+const allChapters = getAllChapters();
 ---
 
 <!doctype html>
@@ -94,30 +98,27 @@ const githubConfig = getGitHubConfig();
 						</div>
 
 						<div class="form-group">
-							<label for="chapter">Chapter Number / ID</label>
+							<label for="subject">Subject</label>
+							<select id="subject" name="subject" required>
+								{allSubjects.map((s) => (
+									<option value={s.slug}>{s.icon} {s.name}</option>
+								))}
+							</select>
+						</div>
+
+						<div class="form-group">
+							<label for="chapter">Chapter</label>
+							<select id="chapterSelect">
+								<!-- Populated dynamically -->
+							</select>
 							<input
 								type="text"
 								id="chapter"
 								name="chapter"
-								placeholder="e.g. 2.6"
+								placeholder="Or enter chapter name..."
 								required
+								style="margin-top: 6px;"
 							/>
-						</div>
-
-						<div class="form-group">
-							<label for="subject">Subject</label>
-							<select id="subject" name="subject" required>
-								<option value="PHP">PHP 🐘</option>
-								<option value="Python">Python 🐍</option>
-								<option value="Java">Java ☕</option>
-								<option value="C++">C++ 💻</option>
-								<option value="C">C ⚙️</option>
-								<option value="MySQL">MySQL 🗄️</option>
-								<option value="DSA">DSA 🌳</option>
-								<option value="HTML">HTML 🌐</option>
-								<option value="CSS">CSS 🎨</option>
-								<option value="JavaScript">JavaScript ⚡</option>
-							</select>
 						</div>
 
 						<div class="form-group">
@@ -129,6 +130,24 @@ const githubConfig = getGitHubConfig();
 								value="Fahad Sir"
 								required
 							/>
+						</div>
+
+						<div class="form-group">
+							<label for="order">Display Order Number</label>
+							<input
+								type="number"
+								id="order"
+								name="order"
+								placeholder="e.g. 1, 2, 3..."
+							/>
+						</div>
+
+						<div class="form-group">
+							<label for="publishedStatus">Publishing Status</label>
+							<select id="publishedStatus" name="published">
+								<option value="true" selected>🟢 Published (Visible to Public)</option>
+								<option value="false">🔒 Draft / Unpublished (Admin Only)</option>
+							</select>
 						</div>
 
 						<div class="form-group full-width">
@@ -187,6 +206,9 @@ PHP provides built-in functions for file and directory handling..."
 			</main>
 		</div>
 
+		<!-- CHAPTERS DATA -->
+		<script id="chaptersJson" type="application/json" set:html={JSON.stringify(allChapters)}></script>
+
 		<!-- CLIENT SCRIPT -->
 		<script is:inline define:vars={{ supabaseUrl: config.url, supabaseKey: config.anonKey, isConfigured: config.isConfigured }}>
 			// Theme Toggle
@@ -222,32 +244,26 @@ PHP provides built-in functions for file and directory handling..."
 					const mod = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
 					supabase = mod.createClient(supabaseUrl, supabaseKey);
 
-					const secretPass = localStorage.getItem("admin_secret_pass");
-					const isSecretAdmin = secretPass === "324232";
-					let displayEmail = "fahadvohra143@gmail.com (Secret Admin)";
-
-					if (!isSecretAdmin) {
-						const { data: { session } } = await supabase.auth.getSession();
-						if (!session) {
-							window.location.href = "/login";
-							return;
-						}
-
-						sessionToken = session.access_token;
-
-						const { data: profile } = await supabase
-							.from("profiles")
-							.select("role, email")
-							.eq("id", session.user.id)
-							.single();
-
-						if (!profile || profile.role?.trim().toLowerCase() !== "admin") {
-							alert("Unauthorized: Admin access required.");
-							window.location.href = "/login";
-							return;
-						}
-						displayEmail = profile.email || session.user.email;
+					const { data: { session } } = await supabase.auth.getSession();
+					if (!session) {
+						window.location.href = "/login";
+						return;
 					}
+
+					sessionToken = session.access_token;
+
+					const { data: profile } = await supabase
+						.from("profiles")
+						.select("role, email")
+						.eq("id", session.user.id)
+						.single();
+
+					if (!profile || profile.role?.trim().toLowerCase() !== "admin") {
+						alert("Unauthorized: Admin access required.");
+						window.location.href = "/login";
+						return;
+					}
+					const displayEmail = profile.email || session.user.email;
 
 					const adminPill = document.getElementById("adminUserPill");
 					if (adminPill) adminPill.textContent = `👑 ${displayEmail}`;
@@ -262,6 +278,38 @@ PHP provides built-in functions for file and directory handling..."
 			}
 
 			initAuth();
+
+			// Dynamic Chapter Options
+			const chaptersData = JSON.parse(document.getElementById("chaptersJson")?.textContent || "[]");
+			const subjectSelect = document.getElementById("subject");
+			const chapterSelect = document.getElementById("chapterSelect");
+			const chapterInput = document.getElementById("chapter");
+
+			function updateChapterOptions() {
+				if (!subjectSelect || !chapterSelect) return;
+				const selectedSubject = subjectSelect.value.toLowerCase();
+				const filtered = chaptersData.filter(c => c.subject.toLowerCase() === selectedSubject);
+
+				chapterSelect.innerHTML = '<option value="">-- Select Existing Chapter --</option>';
+				filtered.forEach(c => {
+					const opt = document.createElement("option");
+					opt.value = c.title;
+					opt.textContent = c.title;
+					chapterSelect.appendChild(opt);
+				});
+				if (filtered.length > 0 && chapterInput && !chapterInput.value) {
+					chapterInput.value = filtered[0].title;
+					chapterSelect.value = filtered[0].title;
+				}
+			}
+
+			subjectSelect?.addEventListener("change", updateChapterOptions);
+			chapterSelect?.addEventListener("change", () => {
+				if (chapterSelect.value && chapterInput) {
+					chapterInput.value = chapterSelect.value;
+				}
+			});
+			updateChapterOptions();
 
 			// Auto Filename Generator
 			const titleInput = document.getElementById("title");
@@ -416,6 +464,9 @@ PHP provides built-in functions for file and directory handling..."
 				const filename = document.getElementById("filename").value.trim();
 				const body = document.getElementById("markdownContent").value;
 
+				const orderVal = document.getElementById("order")?.value;
+				const publishedVal = document.getElementById("publishedStatus")?.value === "true";
+
 				if (!title || !chapter || !filename || !description) {
 					alert("Please fill in all required fields (Title, Chapter, Subject, Description, Filename).");
 					return;
@@ -430,7 +481,6 @@ PHP provides built-in functions for file and directory handling..."
 						headers: {
 							"Content-Type": "application/json",
 							"Authorization": `Bearer ${sessionToken}`,
-							"x-admin-secret": localStorage.getItem("admin_secret_pass") || "",
 						},
 						body: JSON.stringify({
 							filename,
@@ -440,6 +490,8 @@ PHP provides built-in functions for file and directory handling..."
 							chapter,
 							author,
 							body,
+							order: orderVal ? parseInt(orderVal, 10) : undefined,
+							published: publishedVal,
 						}),
 					});
 

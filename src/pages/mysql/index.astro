@@ -1,6 +1,14 @@
 ---
 import { getCollection } from "astro:content";
 import SubjectIndex from "../../components/SubjectIndex.astro";
+import { getSubjectBySlug } from "../../lib/subjects";
+
+const meta = getSubjectBySlug("mysql");
+if (!meta || meta.published === false) {
+  return Astro.redirect("/");
+}
 const notes = await getCollection("mysql");
 ---
-<SubjectIndex notes={notes} slug="mysql" label="MySQL" title="MySQL & SQL" description="Learn SQL queries, DBMS concepts, exercises, SQLite, and database practice." />
+<SubjectIndex notes={notes} slug="mysql" label={meta.name} title={meta.name} description={meta.description} />
+
+

@@ -23,8 +23,11 @@ export const getSupabaseConfig = () => {
 export interface Profile {
   id: string;
   email: string;
+  full_name?: string;
   role: 'admin' | 'student';
+  is_blocked: boolean;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface Suggestion {

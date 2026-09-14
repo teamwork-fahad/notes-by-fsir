@@ -1,8 +1,5 @@
 import type { APIRoute } from "astro";
-import fs from "node:fs";
-import path from "node:path";
-import { getSupabaseConfig } from "../../../lib/supabase";
-import { deleteFileFromGitHub, getGitHubConfig } from "../../../lib/github";
+import { getSupabaseConfig } from "../../../../lib/supabase";
 
 export const prerender = false;
 
@@ -18,6 +15,7 @@ async function verifyAdminAuth(authHeader: string | null) {
     return { authorized: false, error: "Supabase authentication is not configured on server." };
   }
 
+  // 1. Verify User Token with Supabase Auth API
   const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
     headers: {
       "Authorization": `Bearer ${token}`,
@@ -57,10 +55,10 @@ async function verifyAdminAuth(authHeader: string | null) {
   }
 
   if (!profile || profile.role?.trim().toLowerCase() !== "admin") {
-    return { authorized: false, error: "Unauthorized access: Only authenticated Admin users can delete notes." };
+    return { authorized: false, error: "Unauthorized access: Only authenticated Admin users can manage block status." };
   }
 
-  return { authorized: true, user };
+  return { authorized: true, user, token };
 }
 
 export const POST: APIRoute = async ({ request }) => {
@@ -76,81 +74,67 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     const bodyData = await request.json();
-    const { filename, subject } = bodyData;
+    const { userId, is_blocked } = bodyData;
 
-    if (!filename || !subject) {
+    if (!userId || typeof is_blocked !== "boolean") {
       return new Response(
-        JSON.stringify({ error: "Missing filename or subject for deletion." }),
+        JSON.stringify({ error: "Missing required parameters: userId and is_blocked boolean." }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    let cleanFilename = filename.trim().toLowerCase();
-    if (!cleanFilename.endsWith(".md")) {
-      cleanFilename += ".md";
-    }
-
-    let targetSubject = subject.toLowerCase().trim();
-    if (targetSubject === "c++") targetSubject = "cpp";
-    if (targetSubject === "javascript") targetSubject = "js";
-
-    const filePath = `src/content/${targetSubject}/${cleanFilename}`;
-    const commitMessage = `admin(note): delete note ${filePath}`;
-
-    // 1. Delete from local disk
-    let deletedLocally = false;
-    try {
-      const fullLocalPath = path.join(process.cwd(), filePath);
-      if (fs.existsSync(fullLocalPath)) {
-        fs.unlinkSync(fullLocalPath);
-        deletedLocally = true;
-      }
-    } catch (fsErr) {
-      console.warn("Local FS delete warning:", fsErr);
-    }
-
-    // 2. Delete from GitHub if configured
-    let githubResult = null;
-    let githubError: string | null = null;
-    const githubConfig = getGitHubConfig();
-
-    if (githubConfig.isConfigured) {
-      try {
-        githubResult = await deleteFileFromGitHub(filePath, commitMessage);
-      } catch (ghErr: any) {
-        githubError = ghErr.message;
-        console.error("GitHub delete failed:", ghErr);
-      }
-    }
-
-    if (!githubResult && !deletedLocally) {
+    // Prevent admin from self-blocking
+    if (userId === authResult.user.id && is_blocked) {
       return new Response(
-        JSON.stringify({ error: githubError || "Failed to delete note locally or from GitHub." }),
+        JSON.stringify({ error: "Action Denied: You cannot block your own Admin account." }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const { url: supabaseUrl, anonKey } = getSupabaseConfig();
+
+    // Update target user profile using caller's admin bearer token
+    const updateRes = await fetch(
+      `${supabaseUrl}/rest/v1/profiles?id=eq.${userId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Authorization": `Bearer ${authResult.token}`,
+          "apikey": anonKey,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation",
+        },
+        body: JSON.stringify({
+          is_blocked,
+          updated_at: new Date().toISOString(),
+        }),
+      }
+    );
+
+    if (!updateRes.ok) {
+      const errText = await updateRes.text();
+      return new Response(
+        JSON.stringify({ error: `Failed to update block status: ${errText}` }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    let successMsg = `Note ${cleanFilename} deleted successfully!`;
-    if (githubResult) {
-      successMsg = `Note ${cleanFilename} deleted successfully from GitHub repository and local disk.`;
-    } else if (deletedLocally && githubError) {
-      successMsg = `Note ${cleanFilename} deleted from local disk! (GitHub warning: ${githubError}).`;
-    }
+    const updatedProfiles = await updateRes.json();
+    const updatedUser = updatedProfiles?.[0];
 
     return new Response(
       JSON.stringify({
         success: true,
-        message: successMsg,
-        filePath,
-        deletedLocally,
+        message: `User account has been successfully ${is_blocked ? "blocked" : "unblocked"}.`,
+        userId,
+        is_blocked: updatedUser?.is_blocked ?? is_blocked,
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
 
   } catch (err: any) {
-    console.error("Delete note error:", err);
     return new Response(
-      JSON.stringify({ error: err.message || "Failed to delete note." }),
+      JSON.stringify({ error: err.message || "Failed to update user block status." }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

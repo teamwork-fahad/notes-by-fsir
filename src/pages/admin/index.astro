@@ -106,6 +106,9 @@ const totalSubjects = subjects.length;
 						<button class="nav-item active" data-tab="overview">
 							<span>📊</span> Overview Dashboard
 						</button>
+						<a href="/admin/users" class="nav-item" style="text-decoration: none;">
+							<span>👥</span> User Management
+						</a>
 						<button class="nav-item" data-tab="notes">
 							<span>📚</span> Note Management
 						</button>
@@ -375,38 +378,36 @@ const totalSubjects = subjects.length;
 					const mod = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
 					supabase = mod.createClient(supabaseUrl, supabaseKey);
 
-					const secretPass = localStorage.getItem("admin_secret_pass");
-					const isSecretAdmin = secretPass === "324232";
+					const { data: { session } } = await supabase.auth.getSession();
 
-					let displayEmail = "fahadvohra143@gmail.com (Secret Admin)";
-
-					if (!isSecretAdmin) {
-						const { data: { session } } = await supabase.auth.getSession();
-
-						if (!session) {
-							// Not logged in -> redirect to login
-							window.location.href = "/login";
-							return;
-						}
-
-						// Verify role from database
-						const { data: profile, error } = await supabase
-							.from("profiles")
-							.select("role, email")
-							.eq("id", session.user.id)
-							.single();
-
-						if (error || !profile || profile.role?.trim().toLowerCase() !== "admin") {
-							alert("Unauthorized Access: Only authenticated ADMIN users can access this page.");
-							window.location.href = "/login";
-							return;
-						}
-
-						currentAdminUser = session.user;
-						displayEmail = profile.email || session.user.email;
-					} else {
-						currentAdminUser = { email: "fahadvohra143@gmail.com" };
+					if (!session) {
+						// Not logged in -> redirect to login
+						window.location.href = "/login";
+						return;
 					}
+
+					// Verify role & block status from database
+					const { data: profile, error } = await supabase
+						.from("profiles")
+						.select("role, email, is_blocked")
+						.eq("id", session.user.id)
+						.single();
+
+					if (profile?.is_blocked) {
+						await supabase.auth.signOut();
+						alert("Account Blocked: Your admin account has been disabled.");
+						window.location.href = "/login";
+						return;
+					}
+
+					if (error || !profile || profile.role?.trim().toLowerCase() !== "admin") {
+						alert("Unauthorized Access: Only authenticated ADMIN users can access this page.");
+						window.location.href = "/login";
+						return;
+					}
+
+					currentAdminUser = session.user;
+					const displayEmail = profile.email || session.user.email;
 
 					// Display Admin Details
 					const adminPill = document.getElementById("adminUserPill");
@@ -431,7 +432,6 @@ const totalSubjects = subjects.length;
 
 			// Logout Handler
 			document.getElementById("logoutBtn")?.addEventListener("click", async () => {
-				localStorage.removeItem("admin_secret_pass");
 				if (supabase) {
 					await supabase.auth.signOut();
 				}

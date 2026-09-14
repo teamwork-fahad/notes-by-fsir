@@ -1,26 +1,27 @@
 ---
 import { getCollection } from "astro:content";
+import { getActiveSubjects } from "../lib/subjects";
 
-const subjectDefinitions = [
-	{ collection: "php", name: "PHP", icon: "🐘", description: "PHP notes, programs, examples and practicals.", href: "/php" },
-	{ collection: "cpp", name: "C++", icon: "💻", description: "C++ concepts, OOP, programs and examples.", href: "/cpp" },
-	{ collection: "python", name: "Python", icon: "🐍", description: "Python programming notes and practical examples.", href: "/python" },
-	{ collection: "mysql", name: "MySQL", icon: "🗄️", description: "SQL queries, database concepts and exercises.", href: "/mysql" },
-	{ collection: "dsa", name: "DSA", icon: "🌳", description: "Data Structures and Algorithms notes and programs.", href: "/dsa" },
-	{ collection: "css", name: "CSS", icon: "🎨", description: "CSS fundamentals, layout and practical styling examples.", href: "/css" },
-	{ collection: "html", name: "HTML", icon: "🌐", description: "HTML structure, elements and semantic web development.", href: "/html" },
-	{ collection: "js", name: "JavaScript", icon: "⚡", description: "JavaScript concepts, browser APIs and Angular notes.", href: "/js" },
-	{ collection: "maths", name: "Mathematics", icon: "📐", description: "Mathematics units, formulas and solved examples.", href: "/maths" },
-	{ collection: "foc", name: "Computer Fundamentals", icon: "🖥️", description: "Computer fundamentals with clear unit-wise notes.", href: "/foc" },
-	{ collection: "docs", name: "Documentation", icon: "📚", description: "Guides, references and practical documentation.", href: "/docs" },
-];
+const subjectMetas = getActiveSubjects();
 
-const subjects = (await Promise.all(
-	subjectDefinitions.map(async (subject) => ({
-		...subject,
-		count: (await getCollection(subject.collection as Parameters<typeof getCollection>[0])).length,
-	})),
-)).filter((subject) => subject.count > 0);
+const subjects = (
+	await Promise.all(
+		subjectMetas.map(async (meta) => {
+			let count = 0;
+			try {
+				const notes = await getCollection(meta.slug as any);
+				count = notes ? (notes as any[]).filter((n: any) => n.data.published !== false).length : 0;
+			} catch {
+				count = 0;
+			}
+			return {
+				...meta,
+				href: `/${meta.slug}`,
+				count,
+			};
+		})
+	)
+).filter((subject: any) => subject.count > 0);
 ---
 
 <!doctype html>
@@ -115,7 +116,7 @@ const subjects = (await Promise.all(
 
 				<div class="subject-grid">
 					{
-						subjects.map((subject) => (
+						subjects.map((subject: any) => (
 							<a href={subject.href} class="subject-card">
 								<div class="subject-icon">{subject.icon}</div>
 
@@ -656,7 +657,7 @@ const subjects = (await Promise.all(
 			homeSearch?.addEventListener("input", () => {
 				const query = homeSearch.value.trim().toLowerCase();
 				subjectCards.forEach((card) => {
-					card.hidden = query !== "" && !card.textContent.toLowerCase().includes(query);
+					(card as HTMLElement).hidden = query !== "" && !(card.textContent || "").toLowerCase().includes(query);
 				});
 			});
 		</script>

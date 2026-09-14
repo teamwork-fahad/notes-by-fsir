@@ -1,6 +1,14 @@
 ---
 import { getCollection } from "astro:content";
 import SubjectIndex from "../../components/SubjectIndex.astro";
+import { getSubjectBySlug } from "../../lib/subjects";
+
+const meta = getSubjectBySlug("python");
+if (!meta || meta.published === false) {
+  return Astro.redirect("/");
+}
 const notes = await getCollection("python");
 ---
-<SubjectIndex notes={notes} slug="python" label="Python" title="Python Programming" description="Learn Python fundamentals, OOP, practical tasks, and examples for beginners." />
+<SubjectIndex notes={notes} slug="python" label={meta.name} title={meta.name} description={meta.description} />
+
+

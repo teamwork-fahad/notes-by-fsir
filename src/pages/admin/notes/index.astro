@@ -1,0 +1,1105 @@
+---
+import { getCollection } from "astro:content";
+import { getSupabaseConfig } from "../../../lib/supabase";
+import { getGitHubConfig, fetchFileFromGitHub } from "../../../lib/github";
+import { getAllSubjects } from "../../../lib/subjects";
+import { getAllChapters, getChapterTitle } from "../../../lib/chapters";
+
+const config = getSupabaseConfig();
+const githubConfig = getGitHubConfig();
+
+const subjectsList = getAllSubjects();
+const allChaptersList = getAllChapters();
+
+// Fetch SHA for metadata files if GitHub is configured
+let subjectsSha = "";
+let chaptersSha = "";
+
+if (githubConfig.isConfigured) {
+  try {
+    const sFile = await fetchFileFromGitHub("src/data/subjects.json");
+    if (sFile.exists) subjectsSha = sFile.sha || "";
+  } catch (e) {
+    console.warn("Could not fetch subjects.json SHA:", e);
+  }
+
+  try {
+    const cFile = await fetchFileFromGitHub("src/data/chapters.json");
+    if (cFile.exists) chaptersSha = cFile.sha || "";
+  } catch (e) {
+    console.warn("Could not fetch chapters.json SHA:", e);
+  }
+}
+
+const allNotesRaw: any[] = [];
+
+for (const sub of subjectsList) {
+  try {
+    const notes = await getCollection(sub.slug as any);
+    for (const n of (notes as any[])) {
+      const rawChap = n.data.chapter || "General";
+      const displayChap = getChapterTitle(sub.slug, rawChap);
+      allNotesRaw.push({
+        id: n.id,
+        collection: sub.slug,
+        subjectName: sub.name,
+        title: n.data.title,
+        description: n.data.description || "",
+        chapter: rawChap,
+        displayChapter: displayChap,
+        author: n.data.author || "Fahad Sir",
+        order: n.data.order ?? 0,
+        published: n.data.published !== false,
+      });
+    }
+  } catch (e) {
+    console.warn(`Could not load collection ${sub.slug}:`, e);
+  }
+}
+
+// Default sort by subject, then order ASC, then title
+allNotesRaw.sort((a, b) => {
+  if (a.collection !== b.collection) return a.collection.localeCompare(b.collection);
+  if (a.order !== b.order) return a.order - b.order;
+  return a.title.localeCompare(b.title);
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CMS Dashboard | Fahad Sir Admin</title>
+    <meta name="robots" content="noindex, nofollow" />
+  </head>
+  <body>
+    <!-- AUTH GUARD OVERLAY -->
+    <div id="authGuardOverlay" class="auth-guard-overlay">
+      <div class="auth-loader-card">
+        <div class="spinner"></div>
+        <p>Verifying Admin Security Credentials...</p>
+      </div>
+    </div>
+
+    <!-- MAIN ADMIN APP -->
+    <div id="adminApp" class="admin-app hidden">
+      <header class="navbar">
+        <div class="brand-group">
+          <a href="/admin" class="logo">
+            Notes By <span>FSir</span>
+          </a>
+          <span class="admin-badge">📚 Content CMS</span>
+        </div>
+
+        <div class="nav-actions">
+          <span class="admin-user-pill" id="adminUserPill">
+            👤 Admin
+          </span>
+
+          <button id="themeToggle" class="theme-btn" aria-label="Toggle dark mode">
+            🌙
+          </button>
+
+          <button id="logoutBtn" class="logout-btn">
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <div class="admin-layout">
+        <aside class="sidebar">
+          <div class="user-greeting">
+            <h2>Fahad Sir Admin</h2>
+            <p>Content Management System</p>
+          </div>
+
+          <nav class="sidebar-nav">
+            <a href="/admin" class="nav-item">
+              <span>📊</span> Overview Dashboard
+            </a>
+            <a href="/admin/users" class="nav-item">
+              <span>👥</span> User Management
+            </a>
+            <a href="/admin/notes" class="nav-item active">
+              <span>📚</span> Note Management
+            </a>
+          </nav>
+
+          <div class="sidebar-footer">
+            <a href="/" class="site-link">← View Public Website</a>
+          </div>
+        </aside>
+
+        <main class="admin-main">
+          <div class="page-header flex-header">
+            <div>
+              <h1>CMS Dashboard</h1>
+              <p>Manage Markdown tutorial notes, subjects, and chapter metadata.</p>
+            </div>
+
+            <div class="header-actions">
+              <a href="/admin/notes/new" class="primary-btn">
+                + Create New Note
+              </a>
+            </div>
+          </div>
+
+          <div id="statusAlert" class="alert hidden"></div>
+
+          <!-- TAB NAVIGATION -->
+          <div class="tab-nav">
+            <button class="tab-btn active" data-tab="notesTab">📚 Notes ({allNotesRaw.length})</button>
+            <button class="tab-btn" data-tab="subjectsTab">🏷️ Subjects ({subjectsList.length})</button>
+            <button class="tab-btn" data-tab="chaptersTab">📁 Chapters ({allChaptersList.length})</button>
+          </div>
+
+          <!-- TAB 1: NOTES MANAGEMENT -->
+          <div id="notesTab" class="tab-content">
+            <div class="toolbar">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input
+                  type="text"
+                  id="searchInput"
+                  placeholder="Search notes by title or description..."
+                />
+              </div>
+
+              <div class="filter-group">
+                <label for="subjectFilter">Subject:</label>
+                <select id="subjectFilter">
+                  <option value="all">All Subjects ({allNotesRaw.length})</option>
+                  {subjectsList.map((s) => (
+                    <option value={s.slug}>{s.icon} {s.name}</option>
+                  ))}
+                </select>
+
+                <label for="publishedFilter" style="margin-left: 10px;">Status:</label>
+                <select id="publishedFilter">
+                  <option value="all">All Statuses</option>
+                  <option value="published">🟢 Published</option>
+                  <option value="draft">🔒 Draft / Unpublished</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- REORDER HINT BANNER FOR NOTES -->
+            <div id="reorderHint" class="info-callout hidden" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span>↕️ Drag & Drop Note Reordering Active for <strong id="reorderSubjectName">PHP</strong></span>
+                <p style="font-size: 13px; margin-top: 4px;">Drag any row to reorder notes, then click <strong>"Save Note Order"</strong>.</p>
+              </div>
+              <button id="saveNoteOrderBtn" class="primary-btn" style="background: #4f46e5;">
+                💾 Save Note Order
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table" id="notesTable">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">Order</th>
+                    <th>Title & Description</th>
+                    <th>Subject</th>
+                    <th>Chapter</th>
+                    <th>Author</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="notesTbody">
+                  {allNotesRaw.map((note) => (
+                    <tr
+                      class="note-row"
+                      data-id={note.id}
+                      data-collection={note.collection}
+                      data-subject={note.subjectName}
+                      data-chapter={note.chapter}
+                      data-title={note.title.toLowerCase()}
+                      data-published={note.published ? "true" : "false"}
+                      draggable="false"
+                    >
+                      <td class="order-cell">
+                        <span class="drag-handle hidden">☰</span>
+                        <span class="order-badge">{note.order}</span>
+                      </td>
+                      <td>
+                        <strong>{note.title}</strong>
+                        <br />
+                        <small class="text-muted">{note.description}</small>
+                      </td>
+                      <td><span class="subject-pill">{note.subjectName}</span></td>
+                      <td><span class="chapter-badge">{note.displayChapter}</span></td>
+                      <td>{note.author}</td>
+                      <td>
+                        <span class={`status-badge ${note.published ? 'published' : 'draft'}`}>
+                          {note.published ? '🟢 Published' : '🔒 Draft'}
+                        </span>
+                      </td>
+                      <td class="actions-cell">
+                        <a href={`/admin/notes/edit/${note.collection}/${note.id}`} class="action-btn edit-note-btn">
+                          ✏️ Edit
+                        </a>
+                        <button
+                          type="button"
+                          class="action-btn danger delete-note-btn"
+                          data-id={note.id}
+                          data-subject={note.collection}
+                          data-title={note.title}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div id="emptyState" class="empty-state hidden">
+                <p>📚 No notes found matching your search filter.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: SUBJECTS METADATA MANAGEMENT -->
+          <div id="subjectsTab" class="tab-content hidden">
+            <div class="toolbar flex-header" style="margin-bottom: 16px;">
+              <div>
+                <h2>Subject Metadata Registry</h2>
+                <p style="font-size: 13px; color: #6b7280;">Manage subject display names, icons, descriptions, and drag-and-drop ordering.</p>
+              </div>
+              <button id="saveSubjectOrderBtn" class="primary-btn" style="background: #4f46e5;">
+                💾 Save Subject Order
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">Order</th>
+                    <th>Icon & Subject Name</th>
+                    <th>Slug / Collection</th>
+                    <th>Description</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="subjectsTbody">
+                  {subjectsList.map((sub) => (
+                    <tr class="subject-row" data-id={sub.id} data-slug={sub.slug} draggable="true">
+                      <td class="order-cell">
+                        <span class="drag-handle">☰</span>
+                        <span class="order-badge">{sub.order}</span>
+                      </td>
+                      <td>
+                        <strong>{sub.icon} {sub.name}</strong>
+                      </td>
+                      <td><code>{sub.slug}</code></td>
+                      <td><small class="text-muted">{sub.description}</small></td>
+                      <td>
+                        <span class={`status-badge ${sub.published !== false ? 'published' : 'draft'}`}>
+                          {sub.published !== false ? '🟢 Active' : '🔒 Hidden'}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          class="action-btn edit-subject-btn"
+                          data-id={sub.id}
+                          data-slug={sub.slug}
+                          data-name={sub.name}
+                          data-icon={sub.icon}
+                          data-description={sub.description}
+                          data-order={sub.order}
+                          data-published={sub.published !== false ? "true" : "false"}
+                        >
+                          ✏️ Edit Meta
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TAB 3: CHAPTERS METADATA MANAGEMENT -->
+          <div id="chaptersTab" class="tab-content hidden">
+            <div class="toolbar flex-header" style="margin-bottom: 16px;">
+              <div class="filter-group">
+                <label for="chapterSubjectFilter">Select Subject:</label>
+                <select id="chapterSubjectFilter">
+                  {subjectsList.map((s) => (
+                    <option value={s.slug}>{s.icon} {s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <button id="saveChapterOrderBtn" class="primary-btn" style="background: #4f46e5;">
+                💾 Save Chapter Order
+              </button>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">Order</th>
+                    <th>Chapter Title</th>
+                    <th>Subject</th>
+                    <th>Immutable Path</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="chaptersTbody">
+                  {allChaptersList.map((chap) => (
+                    <tr class="chapter-row" data-id={chap.id} data-subject={chap.subject} data-path={chap.path} draggable="true">
+                      <td class="order-cell">
+                        <span class="drag-handle">☰</span>
+                        <span class="order-badge">{chap.order}</span>
+                      </td>
+                      <td><strong>{chap.title}</strong></td>
+                      <td><span class="subject-pill">{chap.subject}</span></td>
+                      <td><code>{chap.path}</code></td>
+                      <td>
+                        <span class={`status-badge ${chap.published !== false ? 'published' : 'draft'}`}>
+                          {chap.published !== false ? '🟢 Active' : '🔒 Hidden'}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          type="button"
+                          class="action-btn edit-chapter-btn"
+                          data-id={chap.id}
+                          data-subject={chap.subject}
+                          data-title={chap.title}
+                          data-path={chap.path}
+                          data-order={chap.order}
+                          data-published={chap.published !== false ? "true" : "false"}
+                        >
+                          ✏️ Edit Meta
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- EDIT SUBJECT MODAL -->
+    <div id="subjectModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h3>✏️ Edit Subject Metadata</h3>
+        <form id="subjectModalForm">
+          <input type="hidden" id="modalSubjectId" />
+          <input type="hidden" id="modalSubjectSlug" />
+          <div class="form-group">
+            <label>Subject Display Name</label>
+            <input type="text" id="modalSubjectName" required />
+          </div>
+          <div class="form-group">
+            <label>Icon Emoji</label>
+            <input type="text" id="modalSubjectIcon" required />
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="modalSubjectDescription" required />
+          </div>
+          <div class="form-group">
+            <label>Published Status</label>
+            <select id="modalSubjectPublished">
+              <option value="true">🟢 Active (Visible)</option>
+              <option value="false">🔒 Hidden (Unpublished)</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" id="closeSubjectModalBtn">Cancel</button>
+            <button type="submit" class="primary-btn">Save Subject Metadata</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- EDIT CHAPTER MODAL -->
+    <div id="chapterModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <h3>✏️ Edit Chapter Metadata</h3>
+        <form id="chapterModalForm">
+          <input type="hidden" id="modalChapterId" />
+          <input type="hidden" id="modalChapterSubject" />
+          <input type="hidden" id="modalChapterPath" />
+          <div class="form-group">
+            <label>Chapter Display Title</label>
+            <input type="text" id="modalChapterTitle" required />
+          </div>
+          <div class="form-group">
+            <label>Published Status</label>
+            <select id="modalChapterPublished">
+              <option value="true">🟢 Active (Visible)</option>
+              <option value="false">🔒 Hidden (Unpublished)</option>
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="secondary-btn" id="closeChapterModalBtn">Cancel</button>
+            <button type="submit" class="primary-btn">Save Chapter Metadata</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- HIDDEN SHA DATA TAGS -->
+    <script id="shaData" type="application/json" set:html={JSON.stringify({ subjectsSha, chaptersSha })}></script>
+
+    <!-- CLIENT ADMIN SCRIPT -->
+    <script is:inline define:vars={{ supabaseUrl: config.url, supabaseKey: config.anonKey, isConfigured: config.isConfigured }}>
+      const shaData = JSON.parse(document.getElementById("shaData")?.textContent || "{}");
+      let currentSubjectsSha = shaData.subjectsSha || "";
+      let currentChaptersSha = shaData.chaptersSha || "";
+
+      // Theme Toggle
+      const themeButton = document.getElementById("themeToggle");
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        document.body.classList.add("dark");
+        if (themeButton) themeButton.textContent = "☀️";
+      }
+      themeButton?.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        const isDark = document.body.classList.contains("dark");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+        themeButton.textContent = isDark ? "☀️" : "🌙";
+      });
+
+      let supabase = null;
+      let sessionToken = null;
+
+      // Auth Guard
+      async function initAdminGuard() {
+        const overlay = document.getElementById("authGuardOverlay");
+        const app = document.getElementById("adminApp");
+
+        if (!isConfigured || !supabaseUrl || !supabaseKey) {
+          alert("Supabase credentials not configured in .env.local! Redirecting to Login.");
+          window.location.href = "/login";
+          return;
+        }
+
+        try {
+          const mod = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm");
+          supabase = mod.createClient(supabaseUrl, supabaseKey);
+
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            window.location.href = "/login";
+            return;
+          }
+
+          sessionToken = session.access_token;
+
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role, email, is_blocked")
+            .eq("id", session.user.id)
+            .single();
+
+          if (profile?.is_blocked) {
+            await supabase.auth.signOut();
+            alert("Account Blocked: Access denied.");
+            window.location.href = "/login";
+            return;
+          }
+
+          if (!profile || profile.role?.trim().toLowerCase() !== "admin") {
+            alert("Unauthorized Access: Admin access required.");
+            window.location.href = "/login";
+            return;
+          }
+
+          const displayEmail = profile.email || session.user.email;
+          const adminPill = document.getElementById("adminUserPill");
+          if (adminPill) adminPill.textContent = `👑 ${displayEmail}`;
+
+          overlay?.classList.add("hidden");
+          app?.classList.remove("hidden");
+
+        } catch (err) {
+          console.error("Auth guard error:", err);
+          window.location.href = "/login";
+        }
+      }
+
+      initAdminGuard();
+
+      // Logout Handler
+      document.getElementById("logoutBtn")?.addEventListener("click", async () => {
+        if (supabase) await supabase.auth.signOut();
+        window.location.href = "/login";
+      });
+
+      // TAB NAVIGATION LOGIC
+      const tabButtons = document.querySelectorAll(".tab-btn");
+      const tabContents = document.querySelectorAll(".tab-content");
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetId = btn.getAttribute("data-tab");
+          tabButtons.forEach(b => b.classList.remove("active"));
+          tabContents.forEach(c => c.classList.add("hidden"));
+
+          btn.classList.add("active");
+          const targetTab = document.getElementById(targetId);
+          if (targetTab) targetTab.classList.remove("hidden");
+        });
+      });
+
+      // NOTES FILTER & SEARCH LOGIC
+      const searchInput = document.getElementById("searchInput");
+      const subjectFilter = document.getElementById("subjectFilter");
+      const publishedFilter = document.getElementById("publishedFilter");
+      const noteRows = Array.from(document.querySelectorAll(".note-row"));
+      const emptyState = document.getElementById("emptyState");
+      const notesTable = document.getElementById("notesTable");
+      const reorderHint = document.getElementById("reorderHint");
+      const saveNoteOrderBtn = document.getElementById("saveNoteOrderBtn");
+      const reorderSubjectName = document.getElementById("reorderSubjectName");
+
+      function applyNotesFilters() {
+        const query = searchInput?.value.toLowerCase().trim() || "";
+        const subject = subjectFilter?.value || "all";
+        const status = publishedFilter?.value || "all";
+
+        let visibleCount = 0;
+
+        noteRows.forEach(row => {
+          const rowTitle = row.getAttribute("data-title") || "";
+          const rowSubject = row.getAttribute("data-collection") || "";
+          const rowPublished = row.getAttribute("data-published") === "true";
+
+          const matchSearch = rowTitle.includes(query);
+          const matchSubject = subject === "all" || rowSubject === subject;
+          const matchStatus = status === "all" ? true : status === "published" ? rowPublished : !rowPublished;
+
+          const isVisible = matchSearch && matchSubject && matchStatus;
+          row.classList.toggle("hidden", !isVisible);
+          if (isVisible) visibleCount++;
+        });
+
+        if (emptyState) emptyState.classList.toggle("hidden", visibleCount > 0);
+        if (notesTable) notesTable.classList.toggle("hidden", visibleCount === 0);
+
+        const isSubjectSelected = subject !== "all";
+        if (reorderHint) reorderHint.classList.toggle("hidden", !isSubjectSelected);
+        if (reorderSubjectName && isSubjectSelected) {
+          reorderSubjectName.textContent = subjectFilter.options[subjectFilter.selectedIndex].text;
+        }
+
+        noteRows.forEach(row => {
+          const isRowInSubject = isSubjectSelected && row.getAttribute("data-collection") === subject;
+          row.setAttribute("draggable", isRowInSubject ? "true" : "false");
+          const handle = row.querySelector(".drag-handle");
+          if (handle) handle.classList.toggle("hidden", !isRowInSubject);
+        });
+      }
+
+      searchInput?.addEventListener("input", applyNotesFilters);
+      subjectFilter?.addEventListener("change", applyNotesFilters);
+      publishedFilter?.addEventListener("change", applyNotesFilters);
+
+      // DRAG & DROP FOR NOTES
+      let draggedNoteRow = null;
+      const notesTbody = document.getElementById("notesTbody");
+
+      notesTbody?.addEventListener("dragstart", (e) => {
+        const target = e.target.closest(".note-row");
+        if (!target || target.getAttribute("draggable") !== "true") return;
+        draggedNoteRow = target;
+        target.classList.add("dragging");
+        e.dataTransfer.effectAllowed = "move";
+      });
+
+      notesTbody?.addEventListener("dragend", (e) => {
+        const target = e.target.closest(".note-row");
+        if (target) target.classList.remove("dragging");
+        draggedNoteRow = null;
+        updateNoteOrderBadges();
+      });
+
+      notesTbody?.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (!draggedNoteRow) return;
+        const targetRow = e.target.closest(".note-row");
+        if (targetRow && targetRow !== draggedNoteRow && targetRow.getAttribute("draggable") === "true") {
+          const rect = targetRow.getBoundingClientRect();
+          const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+          notesTbody.insertBefore(draggedNoteRow, next ? targetRow.nextSibling : targetRow);
+        }
+      });
+
+      function updateNoteOrderBadges() {
+        const activeSubject = subjectFilter?.value;
+        if (!activeSubject || activeSubject === "all") return;
+        const visibleSubjectRows = noteRows.filter(r => !r.classList.contains("hidden") && r.getAttribute("data-collection") === activeSubject);
+        visibleSubjectRows.forEach((row, index) => {
+          const badge = row.querySelector(".order-badge");
+          if (badge) badge.textContent = index + 1;
+        });
+      }
+
+      // SAVE NOTE ORDER
+      saveNoteOrderBtn?.addEventListener("click", async () => {
+        const activeSubject = subjectFilter?.value;
+        if (!activeSubject || activeSubject === "all") return;
+
+        const visibleSubjectRows = Array.from(notesTbody.querySelectorAll(".note-row")).filter(r => !r.classList.contains("hidden") && r.getAttribute("data-collection") === activeSubject);
+        const reorderItems = visibleSubjectRows.map(row => ({
+          filename: row.getAttribute("data-id"),
+        }));
+
+        saveNoteOrderBtn.disabled = true;
+
+        try {
+          const res = await fetch("/api/notes/reorder", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify({
+              subject: activeSubject,
+              items: reorderItems,
+            }),
+          });
+
+          const data = await res.json();
+          if (res.status === 409) {
+            alert("⚠️ SHA Conflict: Remote content has been updated by another admin. Refreshing latest data...");
+            window.location.reload();
+            return;
+          }
+          if (!res.ok) throw new Error(data.error || "Failed to reorder notes.");
+
+          alert(data.message || "Note order updated successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Reorder error: " + err.message);
+        } finally {
+          saveNoteOrderBtn.disabled = false;
+        }
+      });
+
+      // DRAG & DROP FOR SUBJECTS
+      let draggedSubjectRow = null;
+      const subjectsTbody = document.getElementById("subjectsTbody");
+
+      subjectsTbody?.addEventListener("dragstart", (e) => {
+        const target = e.target.closest(".subject-row");
+        if (!target) return;
+        draggedSubjectRow = target;
+        target.classList.add("dragging");
+      });
+
+      subjectsTbody?.addEventListener("dragend", (e) => {
+        const target = e.target.closest(".subject-row");
+        if (target) target.classList.remove("dragging");
+        draggedSubjectRow = null;
+        updateSubjectOrderBadges();
+      });
+
+      subjectsTbody?.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (!draggedSubjectRow) return;
+        const targetRow = e.target.closest(".subject-row");
+        if (targetRow && targetRow !== draggedSubjectRow) {
+          const rect = targetRow.getBoundingClientRect();
+          const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+          subjectsTbody.insertBefore(draggedSubjectRow, next ? targetRow.nextSibling : targetRow);
+        }
+      });
+
+      function updateSubjectOrderBadges() {
+        const rows = Array.from(subjectsTbody.querySelectorAll(".subject-row"));
+        rows.forEach((row, index) => {
+          const badge = row.querySelector(".order-badge");
+          if (badge) badge.textContent = index + 1;
+        });
+      }
+
+      // SAVE SUBJECT ORDER
+      const saveSubjectOrderBtn = document.getElementById("saveSubjectOrderBtn");
+      saveSubjectOrderBtn?.addEventListener("click", async () => {
+        const rows = Array.from(subjectsTbody.querySelectorAll(".subject-row"));
+        const reorderItems = rows.map(r => ({ id: r.getAttribute("data-id") }));
+
+        saveSubjectOrderBtn.disabled = true;
+        try {
+          const res = await fetch("/api/admin/subjects/reorder", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify({
+              items: reorderItems,
+              expectedSha: currentSubjectsSha || undefined,
+            }),
+          });
+
+          const data = await res.json();
+          if (res.status === 409) {
+            alert("⚠️ SHA Conflict: Remote subjects metadata has been updated by another admin. Refreshing latest data...");
+            window.location.reload();
+            return;
+          }
+          if (!res.ok) throw new Error(data.error || "Failed to reorder subjects.");
+
+          alert("Subjects reordered successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Reorder error: " + err.message);
+        } finally {
+          saveSubjectOrderBtn.disabled = false;
+        }
+      });
+
+      // EDIT SUBJECT MODAL HANDLERS
+      const subjectModal = document.getElementById("subjectModal");
+      const subjectModalForm = document.getElementById("subjectModalForm");
+
+      document.querySelectorAll(".edit-subject-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("modalSubjectId").value = btn.getAttribute("data-id");
+          document.getElementById("modalSubjectSlug").value = btn.getAttribute("data-slug");
+          document.getElementById("modalSubjectName").value = btn.getAttribute("data-name");
+          document.getElementById("modalSubjectIcon").value = btn.getAttribute("data-icon");
+          document.getElementById("modalSubjectDescription").value = btn.getAttribute("data-description");
+          document.getElementById("modalSubjectPublished").value = btn.getAttribute("data-published");
+
+          subjectModal?.classList.remove("hidden");
+        });
+      });
+
+      document.getElementById("closeSubjectModalBtn")?.addEventListener("click", () => {
+        subjectModal?.classList.add("hidden");
+      });
+
+      subjectModalForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("modalSubjectId").value;
+        const slug = document.getElementById("modalSubjectSlug").value;
+        const name = document.getElementById("modalSubjectName").value.trim();
+        const icon = document.getElementById("modalSubjectIcon").value.trim();
+        const description = document.getElementById("modalSubjectDescription").value.trim();
+        const published = document.getElementById("modalSubjectPublished").value === "true";
+
+        try {
+          const res = await fetch("/api/admin/subjects/save", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify({
+              id,
+              slug,
+              name,
+              icon,
+              description,
+              published,
+              expectedSha: currentSubjectsSha || undefined,
+            }),
+          });
+
+          const data = await res.json();
+          if (res.status === 409) {
+            alert("⚠️ SHA Conflict: Remote subjects metadata was updated by another admin. Refreshing page...");
+            window.location.reload();
+            return;
+          }
+          if (!res.ok) throw new Error(data.error || "Failed to update subject.");
+
+          alert("Subject metadata updated successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Save subject error: " + err.message);
+        }
+      });
+
+      // CHAPTERS FILTER BY SUBJECT LOGIC
+      const chapterSubjectFilter = document.getElementById("chapterSubjectFilter");
+      const chaptersTbody = document.getElementById("chaptersTbody");
+      const chapterRows = Array.from(document.querySelectorAll(".chapter-row"));
+
+      function filterChaptersBySubject() {
+        const selSub = chapterSubjectFilter?.value || "";
+        chapterRows.forEach(row => {
+          const rowSub = row.getAttribute("data-subject");
+          const isMatch = rowSub === selSub;
+          row.classList.toggle("hidden", !isMatch);
+        });
+        updateChapterOrderBadges();
+      }
+
+      chapterSubjectFilter?.addEventListener("change", filterChaptersBySubject);
+      filterChaptersBySubject();
+
+      // DRAG & DROP FOR CHAPTERS
+      let draggedChapterRow = null;
+
+      chaptersTbody?.addEventListener("dragstart", (e) => {
+        const target = e.target.closest(".chapter-row");
+        if (!target) return;
+        draggedChapterRow = target;
+        target.classList.add("dragging");
+      });
+
+      chaptersTbody?.addEventListener("dragend", (e) => {
+        const target = e.target.closest(".chapter-row");
+        if (target) target.classList.remove("dragging");
+        draggedChapterRow = null;
+        updateChapterOrderBadges();
+      });
+
+      chaptersTbody?.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        if (!draggedChapterRow) return;
+        const targetRow = e.target.closest(".chapter-row");
+        if (targetRow && targetRow !== draggedChapterRow && !targetRow.classList.contains("hidden")) {
+          const rect = targetRow.getBoundingClientRect();
+          const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+          chaptersTbody.insertBefore(draggedChapterRow, next ? targetRow.nextSibling : targetRow);
+        }
+      });
+
+      function updateChapterOrderBadges() {
+        const selSub = chapterSubjectFilter?.value || "";
+        const visibleRows = chapterRows.filter(r => !r.classList.contains("hidden") && r.getAttribute("data-subject") === selSub);
+        visibleRows.forEach((row, index) => {
+          const badge = row.querySelector(".order-badge");
+          if (badge) badge.textContent = index + 1;
+        });
+      }
+
+      // SAVE CHAPTER ORDER
+      const saveChapterOrderBtn = document.getElementById("saveChapterOrderBtn");
+      saveChapterOrderBtn?.addEventListener("click", async () => {
+        const selSub = chapterSubjectFilter?.value;
+        if (!selSub) return;
+
+        const visibleRows = chapterRows.filter(r => !r.classList.contains("hidden") && r.getAttribute("data-subject") === selSub);
+        const reorderItems = visibleRows.map(r => ({ id: r.getAttribute("data-id") }));
+
+        saveChapterOrderBtn.disabled = true;
+        try {
+          const res = await fetch("/api/admin/chapters/reorder", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify({
+              subject: selSub,
+              items: reorderItems,
+              expectedSha: currentChaptersSha || undefined,
+            }),
+          });
+
+          const data = await res.json();
+          if (res.status === 409) {
+            alert("⚠️ SHA Conflict: Remote chapters metadata was updated by another admin. Refreshing latest data...");
+            window.location.reload();
+            return;
+          }
+          if (!res.ok) throw new Error(data.error || "Failed to reorder chapters.");
+
+          alert("Chapters reordered successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Reorder error: " + err.message);
+        } finally {
+          saveChapterOrderBtn.disabled = false;
+        }
+      });
+
+      // EDIT CHAPTER MODAL HANDLERS
+      const chapterModal = document.getElementById("chapterModal");
+      const chapterModalForm = document.getElementById("chapterModalForm");
+
+      document.querySelectorAll(".edit-chapter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("modalChapterId").value = btn.getAttribute("data-id");
+          document.getElementById("modalChapterSubject").value = btn.getAttribute("data-subject");
+          document.getElementById("modalChapterPath").value = btn.getAttribute("data-path");
+          document.getElementById("modalChapterTitle").value = btn.getAttribute("data-title");
+          document.getElementById("modalChapterPublished").value = btn.getAttribute("data-published");
+
+          chapterModal?.classList.remove("hidden");
+        });
+      });
+
+      document.getElementById("closeChapterModalBtn")?.addEventListener("click", () => {
+        chapterModal?.classList.add("hidden");
+      });
+
+      chapterModalForm?.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const id = document.getElementById("modalChapterId").value;
+        const subject = document.getElementById("modalChapterSubject").value;
+        const chapterPath = document.getElementById("modalChapterPath").value;
+        const title = document.getElementById("modalChapterTitle").value.trim();
+        const published = document.getElementById("modalChapterPublished").value === "true";
+
+        try {
+          const res = await fetch("/api/admin/chapters/save", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${sessionToken}`,
+            },
+            body: JSON.stringify({
+              id,
+              subject,
+              path: chapterPath,
+              title,
+              published,
+              expectedSha: currentChaptersSha || undefined,
+            }),
+          });
+
+          const data = await res.json();
+          if (res.status === 409) {
+            alert("⚠️ SHA Conflict: Remote chapters metadata was updated by another admin. Refreshing page...");
+            window.location.reload();
+            return;
+          }
+          if (!res.ok) throw new Error(data.error || "Failed to update chapter.");
+
+          alert("Chapter metadata updated successfully!");
+          window.location.reload();
+        } catch (err) {
+          alert("Save chapter error: " + err.message);
+        }
+      });
+
+      // DELETE NOTE HANDLER
+      document.querySelectorAll(".delete-note-btn").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const title = btn.getAttribute("data-title");
+          const noteId = btn.getAttribute("data-id");
+          const subject = btn.getAttribute("data-subject");
+
+          if (!confirm(`Are you sure you want to delete "${title}" (${noteId})? This action cannot be undone.`)) {
+            return;
+          }
+
+          try {
+            const res = await fetch("/api/notes/delete", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${sessionToken}`,
+              },
+              body: JSON.stringify({
+                filename: noteId,
+                subject,
+              }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Failed to delete note.");
+
+            alert(`Note deleted successfully!`);
+            window.location.reload();
+          } catch (err) {
+            alert("Delete error: " + err.message);
+          }
+        });
+      });
+    </script>
+
+    <!-- STYLES -->
+    <style>
+      :global(*) { box-sizing: border-box; margin: 0; padding: 0; }
+      :global(body) { font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; background: #f7f9fc; min-height: 100vh; }
+      .hidden { display: none !important; }
+      .auth-guard-overlay { position: fixed; inset: 0; background: #ffffff; z-index: 999; display: flex; align-items: center; justify-content: center; }
+      .auth-loader-card { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+      .spinner { width: 44px; height: 44px; border: 4px solid #e0e4f0; border-top-color: #5b4bdb; border-radius: 50%; animation: spin 0.8s linear infinite; }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .navbar { height: 70px; padding: 0 4%; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e9ebf1; background: #ffffff; position: sticky; top: 0; z-index: 100; }
+      .brand-group { display: flex; align-items: center; gap: 14px; }
+      .logo { color: #172033; text-decoration: none; font-size: 22px; font-weight: 800; }
+      .logo span { color: #5b4bdb; }
+      .admin-badge { background: #f2efff; border: 1px solid #e6e2ff; color: #5b4bdb; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+      .nav-actions { display: flex; align-items: center; gap: 14px; }
+      .admin-user-pill { font-size: 14px; font-weight: 600; color: #4b5563; background: #f3f4f6; padding: 6px 12px; border-radius: 8px; }
+      .theme-btn, .logout-btn, .secondary-btn { border: 1px solid #dddff0; background: white; cursor: pointer; font-weight: 600; font-size: 14px; color: #172033; border-radius: 8px; text-decoration: none; }
+      .theme-btn { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+      .secondary-btn { padding: 8px 16px; }
+      .logout-btn { padding: 8px 16px; background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+      .primary-btn { background: #5b4bdb; color: white; padding: 9px 18px; border-radius: 8px; border: none; font-size: 14px; font-weight: 700; text-decoration: none; display: inline-block; cursor: pointer; }
+      .admin-layout { display: grid; grid-template-columns: 260px 1fr; min-height: calc(100vh - 70px); }
+      .sidebar { background: #ffffff; border-right: 1px solid #e9ebf1; padding: 30px 20px; display: flex; flex-direction: column; justify-content: space-between; }
+      .user-greeting { margin-bottom: 24px; }
+      .user-greeting h2 { font-size: 18px; font-weight: 700; color: #172033; }
+      .user-greeting p { font-size: 13px; color: #6b7280; }
+      .sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
+      .sidebar-nav .nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 10px; border: none; background: transparent; color: #4b5563; font-size: 14px; font-weight: 600; text-decoration: none; }
+      .sidebar-nav .nav-item:hover, .sidebar-nav .nav-item.active { background: #f3f0ff; color: #5b4bdb; }
+      .sidebar-footer { border-top: 1px solid #e9ebf1; padding-top: 16px; }
+      .site-link { color: #6b7280; text-decoration: none; font-size: 13px; font-weight: 600; }
+      .admin-main { padding: 30px 40px; }
+      .flex-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+      .page-header h1 { font-size: 26px; font-weight: 800; color: #172033; }
+      .page-header p { font-size: 14px; color: #6b7280; }
+      .header-actions { display: flex; gap: 12px; }
+      .tab-nav { display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; }
+      .tab-btn { background: transparent; border: none; padding: 10px 18px; font-size: 15px; font-weight: 700; color: #6b7280; cursor: pointer; border-radius: 8px; transition: all 0.2s ease; }
+      .tab-btn:hover { background: #f3f4f6; color: #111827; }
+      .tab-btn.active { background: #f3f0ff; color: #5b4bdb; }
+      .info-callout { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 16px 20px; border-radius: 12px; margin-bottom: 20px; font-size: 14px; }
+      .toolbar { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 20px; background: #ffffff; padding: 16px 20px; border-radius: 12px; border: 1px solid #e5e7eb; flex-wrap: wrap; }
+      .search-box { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 280px; background: #f9fafb; border: 1px solid #d1d5db; padding: 8px 12px; border-radius: 8px; }
+      .search-box input { border: none; background: transparent; outline: none; width: 100%; font-size: 14px; }
+      .filter-group { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #4b5563; }
+      .filter-group select { padding: 8px 12px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; outline: none; }
+      .table-container { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden; }
+      .data-table { width: 100%; border-collapse: collapse; text-align: left; }
+      .data-table th, .data-table td { padding: 14px 20px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+      .data-table th { background: #f9fafb; font-weight: 700; color: #374151; font-size: 13px; }
+      .note-row.dragging, .subject-row.dragging, .chapter-row.dragging { opacity: 0.4; background: #e0e7ff; }
+      .order-cell { display: flex; align-items: center; gap: 8px; }
+      .drag-handle { cursor: grab; font-size: 16px; color: #9ca3af; user-select: none; }
+      .order-badge { background: #f3f4f6; color: #374151; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+      .subject-pill { background: #f3f0ff; color: #5b4bdb; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+      .chapter-badge { background: #e0f2fe; color: #0369a1; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+      .status-badge { padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+      .status-badge.published { background: #dcfce7; color: #15803d; }
+      .status-badge.draft { background: #fff8e6; color: #8a6d3b; }
+      .action-btn { padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; text-decoration: none; display: inline-block; }
+      .action-btn.danger { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+      .text-muted { color: #9ca3af; font-size: 13px; }
+      .empty-state { padding: 40px; text-align: center; color: #6b7280; }
+      .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: flex; align-items: center; justify-content: center; }
+      .modal-card { background: white; padding: 30px; border-radius: 16px; width: min(500px, 90vw); display: flex; flex-direction: column; gap: 18px; }
+      .modal-card h3 { font-size: 20px; font-weight: 800; color: #111827; }
+      .modal-card .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+      .modal-card input, .modal-card select { padding: 10px 14px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 14px; outline: none; }
+      .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
+      body.dark { color: #e8eaf0; background: #101116; }
+      body.dark .navbar, body.dark .sidebar { background: #17181e; border-color: #282a33; }
+      body.dark .logo { color: #f0f1f5; }
+      body.dark .toolbar, body.dark .table-container, body.dark .info-callout, body.dark .modal-card { background: #17181e; border-color: #282a33; color: #e8eaf0; }
+      body.dark .search-box, body.dark .filter-group select, body.dark .modal-card input, body.dark .modal-card select { background: #101116; border-color: #282a33; color: #e8eaf0; }
+      body.dark .data-table th { background: #20222a; color: #d1d5db; }
+      body.dark .data-table td { border-color: #282a33; }
+      body.dark .modal-card h3 { color: #f0f1f5; }
+    </style>
+  </body>
+</html>
