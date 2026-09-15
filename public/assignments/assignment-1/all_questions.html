@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All 13 Solutions - Statistics Assignment 1</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 24px 16px;
+    }
+    .container { max-width: 920px; margin: 0 auto; }
+    .header-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+      color: white;
+      padding: 28px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 24px;
+    }
+    .header-banner h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+    .header-banner p { color: #bfdbfe; font-size: 1rem; }
+    .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: white; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .question-box {
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 22px;
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+    .step-container {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .step-container:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .step-num {
+      background: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title { font-size: 1.15rem; font-weight: 600; color: #1e293b; }
+    .easy-note {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-left: 4px solid #eab308;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+      color: #713f12;
+    }
+    .easy-note strong { color: #854d0e; }
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    thead th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+      padding: 11px 13px;
+      border-bottom: 2px solid var(--border);
+    }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    tbody tr:nth-child(even) { background-color: #fafbfc; }
+    tbody tr:hover { background-color: #f1f5f9; }
+    tfoot tr {
+      background: #f8fafc;
+      font-weight: 700;
+      border-top: 2px solid var(--border);
+    }
+    tfoot td { padding: 11px 13px; }
+    .formula-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 1.05rem;
+    }
+    .answer-box {
+      background: var(--success-light);
+      border: 2px solid #86efac;
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-top: 24px;
+    }
+    .answer-box h3 {
+      color: var(--success);
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .answer-box ul { list-style: none; padding-left: 0; }
+    .answer-box li {
+      padding: 5px 0;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #166534;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .q-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+    }
+    .q-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    .q-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .q-card-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+    .q-card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+    .q-card-footer {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .theory-block {
+      margin-bottom: 22px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .theory-block h4 {
+      color: #1e40af;
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #dbeafe;
+      padding-bottom: 5px;
+    }
+    .merit-demerit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 640px) {
+      .merit-demerit-grid { grid-template-columns: 1fr; }
+    }
+    .merits-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .demerits-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .merits-box h5 { color: #166534; margin-bottom: 6px; font-size: 0.95rem; }
+    .demerits-box h5 { color: #991b1b; margin-bottom: 6px; font-size: 0.95rem; }
+    .merits-box ul, .demerits-box ul { padding-left: 18px; font-size: 0.9rem; }
+    .merits-box li, .demerits-box li { margin-bottom: 5px; }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .btn, .nav-bar, footer { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .header-banner { background: #2563eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<div class="header-banner">
+  <h1>📑 Complete Solutions: Questions 1 to 13</h1>
+  <p>Statistics Assignment 1 &bull; All Questions Combined in One Continuous Page (Print & Study Ready)</p>
+  <div class="badge-row">
+    <span class="badge badge-green">Complete 13 Questions</span>
+    <span class="badge badge-purple">Step-by-Step Solutions</span>
+    <span class="badge badge-blue">Print Ready (Ctrl + P)</span>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="index.html" class="btn btn-outline">⬅️ Back to Dashboard</a>
+  <button onclick="window.print()" class="btn btn-primary">🖨️ Print / Save as PDF</button>
+</div>
+
+<div class="card">
+  <div class="card-title">📌 Question 1: Find Mean, Median and Mode</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the mean, median and mode from the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class</th><th>0–10</th><th>10–20</th><th>20–30</th><th>30–40</th><th>40–50</th><th>50–60</th></tr></thead>
+        <tbody><tr><td><strong>Frequency</strong></td><td>4</td><td>6</td><td>20</td><td>10</td><td>7</td><td>3</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    1. <strong>Mean ($\bar{x}$)</strong> ke liye mid-value $x_i$ nikalo, $f_i x_i$ ka sum karo aur $N$ se divide karo.<br>
+    2. <strong>Median</strong> ke liye $\frac{N}{2} = 25$ dhoondo aur median class formula use karo.<br>
+    3. <strong>Mode</strong> ke liye sabse badi frequency ($20$) wali modal class chuno aur formula lagao.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Construct Calculation Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Class Interval</th>
+            <th>Frequency ($f_i$)</th>
+            <th>Mid-point ($x_i$)</th>
+            <th>$f_i x_i$</th>
+            <th>Cumulative Freq ($cf$)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0–10</td><td>4</td><td>5</td><td>20</td><td>4</td></tr>
+          <tr><td>10–20</td><td>6</td><td>15</td><td>90</td><td>10</td></tr>
+          <tr><td>20–30</td><td>20</td><td>25</td><td>500</td><td>30</td></tr>
+          <tr><td>30–40</td><td>10</td><td>35</td><td>350</td><td>40</td></tr>
+          <tr><td>40–50</td><td>7</td><td>45</td><td>315</td><td>47</td></tr>
+          <tr><td>50–60</td><td>3</td><td>55</td><td>165</td><td>50</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 50$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum f_i x_i = 1440$</strong></td>
+            <td>—</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Calculate Arithmetic Mean ($\bar{x}$)</span>
+    </div>
+    <div class="formula-box">
+      $$\bar{x} = \frac{\sum f_i x_i}{N}$$
+      $$\bar{x} = \frac{1440}{50} = \mathbf{28.8}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate Median</span>
+    </div>
+    <p>1. Position of Median: $\frac{N}{2} = \frac{50}{2} = 25$.</p>
+    <p>2. Cumulative frequency just greater than or equal to $25$ is <strong>30</strong> $\implies$ <strong>Median Class = 20–30</strong>.</p>
+    <ul style="margin: 8px 0 12px 20px;">
+      <li>Lower limit of median class ($L$) = $20$</li>
+      <li>$cf$ of preceding class ($cf$) = $10$</li>
+      <li>Frequency of median class ($f$) = $20$</li>
+      <li>Class length ($h$) = $10$</li>
+    </ul>
+    <div class="formula-box">
+      $$\text{Median} = L + \left( \frac{\frac{N}{2} - cf}{f} \right) \times h$$
+      $$\text{Median} = 20 + \left( \frac{25 - 10}{20} \right) \times 10 = 20 + \frac{15}{2} = 20 + 7.5 = \mathbf{27.5}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Calculate Mode</span>
+    </div>
+    <p>Maximum frequency is $20$ $\implies$ <strong>Modal Class = 20–30</strong>.</p>
+    <ul style="margin: 8px 0 12px 20px;">
+      <li>$L = 20$</li>
+      <li>Frequency of modal class ($f_1$) = $20$</li>
+      <li>Frequency of previous class ($f_0$) = $6$</li>
+      <li>Frequency of next class ($f_2$) = $10$</li>
+      <li>Class width ($h$) = $10$</li>
+    </ul>
+    <div class="formula-box">
+      $$\text{Mode} = L + \left( \frac{f_1 - f_0}{2f_1 - f_0 - f_2} \right) \times h$$
+      $$\text{Mode} = 20 + \left( \frac{20 - 6}{2(20) - 6 - 10} \right) \times 10 = 20 + \left( \frac{14}{40 - 16} \right) \times 10$$
+      $$\text{Mode} = 20 + \frac{140}{24} = 20 + 5.833 = \mathbf{25.833} \quad \left( \text{or } 25\frac{5}{6} \right)$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Mean ($\bar{x}$) = <strong>28.8</strong></li>
+      <li>Median = <strong>27.5</strong></li>
+      <li>Mode = <strong>25.833</strong> (or $25\frac{5}{6}$)</li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 2: Find D₅ and D₉</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find $D_5$ and $D_9$ for the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class</th><th>0–4</th><th>4–8</th><th>8–12</th><th>12–16</th><th>16–20</th><th>20–24</th><th>24–28</th><th>28–32</th></tr></thead>
+        <tbody><tr><td><strong>Frequency</strong></td><td>10</td><td>12</td><td>8</td><td>7</td><td>5</td><td>8</td><td>4</td><td>6</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    Deciles data ko 10 equal parts me divide karte hain.<br>
+    $D_k$ ka formula: $L + \left(\frac{\frac{k \cdot N}{10} - cf}{f}\right) \times h$.<br>
+    $D_5$ ke liye position $\frac{5N}{10}$ aur $D_9$ ke liye $\frac{9N}{10}$ nikalte hain.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Construct Cumulative Frequency Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class Interval</th><th>Frequency ($f$)</th><th>Cumulative Frequency ($cf$)</th></tr></thead>
+        <tbody>
+          <tr><td>0–4</td><td>10</td><td>10</td></tr>
+          <tr><td>4–8</td><td>12</td><td>22</td></tr>
+          <tr><td>8–12</td><td>8</td><td>30</td></tr>
+          <tr><td>12–16</td><td>7</td><td>37</td></tr>
+          <tr><td>16–20</td><td>5</td><td>42</td></tr>
+          <tr><td>20–24</td><td>8</td><td>50</td></tr>
+          <tr><td>24–28</td><td>4</td><td>54</td></tr>
+          <tr><td>28–32</td><td>6</td><td>60</td></tr>
+        </tbody>
+        <tfoot><tr><td>Total</td><td><strong>$N = 60$</strong></td><td>—</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Calculate 5th Decile ($D_5$)</span>
+    </div>
+    <p>1. Position of $D_5$: $\frac{5N}{10} = \frac{5 \times 60}{10} = 30$.</p>
+    <p>2. Looking at the $cf$ column, $30$ lies exactly at the end of class <strong>8–12</strong>.</p>
+    <ul style="margin: 8px 0 12px 20px;">
+      <li>Lower limit ($L$) = $8$</li>
+      <li>Cumulative frequency of preceding class ($cf$) = $22$</li>
+      <li>Frequency of class ($f$) = $8$</li>
+      <li>Class width ($h$) = $4$</li>
+    </ul>
+    <div class="formula-box">
+      $$D_5 = L + \left( \frac{\frac{5N}{10} - cf}{f} \right) \times h$$
+      $$D_5 = 8 + \left( \frac{30 - 22}{8} \right) \times 4 = 8 + \left( \frac{8}{8} \right) \times 4 = 8 + 4 = \mathbf{12}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate 9th Decile ($D_9$)</span>
+    </div>
+    <p>1. Position of $D_9$: $\frac{9N}{10} = \frac{9 \times 60}{10} = 54$.</p>
+    <p>2. In the $cf$ column, $54$ lies in the class <strong>24–28</strong>.</p>
+    <ul style="margin: 8px 0 12px 20px;">
+      <li>Lower limit ($L$) = $24$</li>
+      <li>$cf$ of previous class ($cf$) = $50$</li>
+      <li>Frequency of class ($f$) = $4$</li>
+      <li>Class width ($h$) = $4$</li>
+    </ul>
+    <div class="formula-box">
+      $$D_9 = L + \left( \frac{\frac{9N}{10} - cf}{f} \right) \times h$$
+      $$D_9 = 24 + \left( \frac{54 - 50}{4} \right) \times 4 = 24 + \left( \frac{4}{4} \right) \times 4 = 24 + 4 = \mathbf{28}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>5th Decile ($D_5$) = <strong>12</strong></li>
+      <li>9th Decile ($D_9$) = <strong>28</strong></li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 3: Mean Deviation from Mean & Co-efficient</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the mean deviation from mean and co-efficient of mean deviation for the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class</th><th>2–4</th><th>4–6</th><th>6–8</th><th>8–10</th></tr></thead>
+        <tbody><tr><td><strong>Frequency</strong></td><td>3</td><td>4</td><td>2</td><td>1</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    1. Pehle Mean $\bar{x} = \frac{\sum f_i x_i}{N}$ nikalo.<br>
+    2. Har class ke mid-point $x_i$ ka Mean se difference nikalo: $|x_i - \bar{x}|$ (signs ignore karna hai).<br>
+    3. Us difference ko frequency $f_i$ se multiply karke sum karo aur $N$ se divide karo: $MD(\bar{x}) = \frac{\sum f_i |x_i - \bar{x}|}{N}$.<br>
+    4. Coefficient = $\frac{MD(\bar{x})}{\bar{x}}$.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Compute Mean ($\bar{x}$) and Absolute Deviations Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Class</th>
+            <th>Frequency ($f_i$)</th>
+            <th>Mid-point ($x_i$)</th>
+            <th>$f_i x_i$</th>
+            <th>$|x_i - \bar{x}| = |x_i - 5.2|$</th>
+            <th>$f_i |x_i - \bar{x}|$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2–4</td><td>3</td><td>3</td><td>9</td><td>$|3 - 5.2| = 2.2$</td><td>$3 \times 2.2 = 6.6$</td></tr>
+          <tr><td>4–6</td><td>4</td><td>5</td><td>20</td><td>$|5 - 5.2| = 0.2$</td><td>$4 \times 0.2 = 0.8$</td></tr>
+          <tr><td>6–8</td><td>2</td><td>7</td><td>14</td><td>$|7 - 5.2| = 1.8$</td><td>$2 \times 1.8 = 3.6$</td></tr>
+          <tr><td>8–10</td><td>1</td><td>9</td><td>9</td><td>$|9 - 5.2| = 3.8$</td><td>$1 \times 3.8 = 3.8$</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 10$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum f_i x_i = 52$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum f_i |x_i - \bar{x}| = 14.8$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Mean Calculation</span>
+    </div>
+    <div class="formula-box">
+      $$\bar{x} = \frac{\sum f_i x_i}{N} = \frac{52}{10} = \mathbf{5.2}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate Mean Deviation from Mean</span>
+    </div>
+    <div class="formula-box">
+      $$MD(\bar{x}) = \frac{\sum f_i |x_i - \bar{x}|}{N} = \frac{14.8}{10} = \mathbf{1.48}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Calculate Coefficient of Mean Deviation</span>
+    </div>
+    <div class="formula-box">
+      $$\text{Coefficient of } MD(\bar{x}) = \frac{MD(\bar{x})}{\bar{x}} = \frac{1.48}{5.2} = \frac{37}{130} \approx \mathbf{0.2846} \quad (\text{or } 28.46\%)$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Mean ($\bar{x}$) = <strong>5.2</strong></li>
+      <li>Mean Deviation from Mean = <strong>1.48</strong></li>
+      <li>Coefficient of Mean Deviation = <strong>0.2846</strong> (or <strong>28.46%</strong>)</li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 4: Calculate Coefficient of Variation (C.V.)</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Calculate the co-efficient of variation (C.V.) from the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Age (in years)</th><th>0–9</th><th>10–19</th><th>20–29</th><th>30–39</th><th>40–49</th><th>50–59</th></tr></thead>
+        <tbody><tr><td><strong>No. of persons ($f$)</strong></td><td>13</td><td>38</td><td>67</td><td>76</td><td>22</td><td>4</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - Inclusive class intervals (0-9, 10-19) ke mid-values hote hain: $\frac{0+9}{2} = 4.5, 14.5, 24.5 \dots$<br>
+    - Step-deviation method se calculation easy ho jaati hai: $A = 24.5, h = 10, u_i = \frac{x_i - 24.5}{10}$.<br>
+    - Formula: $C.V. = \frac{\sigma}{\bar{x}} \times 100$.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Step-Deviation Calculation Table</span>
+    </div>
+    <p>Let Assumed Mean $A = 24.5$, width $h = 10$. $u_i = \frac{x_i - 24.5}{10}$.</p>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Age (Class)</th>
+            <th>$f_i$</th>
+            <th>Mid-point ($x_i$)</th>
+            <th>$u_i$</th>
+            <th>$f_i u_i$</th>
+            <th>$u_i^2$</th>
+            <th>$f_i u_i^2$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0–9</td><td>13</td><td>4.5</td><td>-2</td><td>-26</td><td>4</td><td>52</td></tr>
+          <tr><td>10–19</td><td>38</td><td>14.5</td><td>-1</td><td>-38</td><td>1</td><td>38</td></tr>
+          <tr><td>20–29</td><td>67</td><td>24.5</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+          <tr><td>30–39</td><td>76</td><td>34.5</td><td>+1</td><td>+76</td><td>1</td><td>76</td></tr>
+          <tr><td>40–49</td><td>22</td><td>44.5</td><td>+2</td><td>+44</td><td>4</td><td>88</td></tr>
+          <tr><td>50–59</td><td>4</td><td>54.5</td><td>+3</td><td>+12</td><td>9</td><td>36</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 220$</strong></td>
+            <td>—</td>
+            <td>—</td>
+            <td><strong>$\sum f_i u_i = 68$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum f_i u_i^2 = 290$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Calculate Mean ($\bar{x}$)</span>
+    </div>
+    <div class="formula-box">
+      $$\bar{x} = A + \left( \frac{\sum f_i u_i}{N} \right) \times h$$
+      $$\bar{x} = 24.5 + \left( \frac{68}{220} \right) \times 10 = 24.5 + 3.0909 = \mathbf{27.5909 \text{ years}}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate Standard Deviation ($\sigma$)</span>
+    </div>
+    <div class="formula-box">
+      $$\sigma = h \times \sqrt{ \frac{\sum f_i u_i^2}{N} - \left( \frac{\sum f_i u_i}{N} \right)^2 }$$
+      $$\frac{\sum f_i u_i^2}{N} = \frac{290}{220} \approx 1.318182$$
+      $$\left( \frac{\sum f_i u_i}{N} \right)^2 = \left( \frac{68}{220} \right)^2 = (0.309091)^2 \approx 0.095537$$
+      $$\text{Variance in } u = 1.318182 - 0.095537 = 1.222645$$
+      $$\sigma = 10 \times \sqrt{1.222645} = 10 \times 1.105733 = \mathbf{11.0573 \text{ years}}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Calculate Coefficient of Variation (C.V.)</span>
+    </div>
+    <div class="formula-box">
+      $$C.V. = \frac{\sigma}{\bar{x}} \times 100$$
+      $$C.V. = \frac{11.0573}{27.5909} \times 100 \approx \mathbf{40.08\%}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Mean ($\bar{x}$) = <strong>27.59 years</strong></li>
+      <li>Standard Deviation ($\sigma$) = <strong>11.06 years</strong></li>
+      <li>Coefficient of Variation (C.V.) = <strong>40.08%</strong></li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 5: Find Q₁ and Q₃</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find $Q_1$ and $Q_3$ from the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class</th><th>20–25</th><th>25–30</th><th>30–35</th><th>35–40</th><th>40–45</th><th>45–50</th></tr></thead>
+        <tbody><tr><td><strong>Frequency ($f$)</strong></td><td>5</td><td>12</td><td>15</td><td>8</td><td>5</td><td>5</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - $Q_1$ (Lower Quartile) = data ka $25\%$ mark $\implies$ position $\frac{N}{4}$.<br>
+    - $Q_3$ (Upper Quartile) = data ka $75\%$ mark $\implies$ position $\frac{3N}{4}$.<br>
+    - Formula: $Q_k = L + \left(\frac{\frac{k \cdot N}{4} - cf}{f}\right) \times h$.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Construct Cumulative Frequency Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class Interval</th><th>Frequency ($f$)</th><th>Cumulative Frequency ($cf$)</th></tr></thead>
+        <tbody>
+          <tr><td>20–25</td><td>5</td><td>5</td></tr>
+          <tr><td>25–30</td><td>12</td><td>17</td></tr>
+          <tr><td>30–35</td><td>15</td><td>32</td></tr>
+          <tr><td>35–40</td><td>8</td><td>40</td></tr>
+          <tr><td>40–45</td><td>5</td><td>45</td></tr>
+          <tr><td>45–50</td><td>5</td><td>50</td></tr>
+        </tbody>
+        <tfoot><tr><td>Total</td><td><strong>$N = 50$</strong></td><td>—</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Calculate First Quartile ($Q_1$)</span>
+    </div>
+    <p>1. Position of $Q_1$: $\frac{N}{4} = \frac{50}{4} = 12.5$.</p>
+    <p>2. $cf$ just greater than $12.5$ is <strong>17</strong> $\implies$ <strong>$Q_1$ Class = 25–30</strong>.</p>
+    <ul style="margin: 8px 0 12px 20px;">
+      <li>Lower limit ($L$) = $25$</li>
+      <li>Preceding $cf$ ($cf$) = $5$</li>
+      <li>Frequency of class ($f$) = $12$</li>
+      <li>Class length ($h$) = $5$</li>
+    </ul>
+    <div class="formula-box">
+      $$Q_1 = L + \left( \frac{\frac{N}{4} - cf}{f} \right) \times h$$
+      $$Q_1 = 25 + \left( \frac{12.5 - 5}{12} \right) \times 5 = 25 + \left( \frac{7.5}{12} \right) \times 5 = 25 + \frac{37.5}{12} = 25 + 3.125 = \mathbf{28.125}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate Third Quartile ($Q_3$)</span>
+    </div>
+    <p>1. Position of $Q_3$: $\frac{3N}{4} = \frac{3 \times 50}{4} = 37.5$.</p>
+    <p>2. $cf$ just greater than $37.5$ is <strong>40</strong> $\implies$ <strong>$Q_3$ Class = 35–40</strong>.</p>
+    <ul style="margin: 8px 0 12px 20px;">
+      <li>Lower limit ($L$) = $35$</li>
+      <li>Preceding $cf$ ($cf$) = $32$</li>
+      <li>Frequency of class ($f$) = $8$</li>
+      <li>Class length ($h$) = $5$</li>
+    </ul>
+    <div class="formula-box">
+      $$Q_3 = L + \left( \frac{\frac{3N}{4} - cf}{f} \right) \times h$$
+      $$Q_3 = 35 + \left( \frac{37.5 - 32}{8} \right) \times 5 = 35 + \left( \frac{5.5}{8} \right) \times 5 = 35 + \frac{27.5}{8} = 35 + 3.4375 = \mathbf{38.4375}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>First Quartile ($Q_1$) = <strong>28.125</strong></li>
+      <li>Third Quartile ($Q_3$) = <strong>38.4375</strong></li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 6: Find Q₁, D₈, and P₆₅</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find $Q_1$, $D_8$, and $P_{65}$ from the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class</th><th>20–30</th><th>30–40</th><th>40–50</th><th>50–60</th><th>60–70</th><th>70–80</th><th>80–90</th></tr></thead>
+        <tbody><tr><td><strong>Frequency</strong></td><td>69</td><td>167</td><td>207</td><td>65</td><td>58</td><td>27</td><td>10</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - $Q_1$ = Position $\frac{N}{4} = \frac{603}{4} = 150.75$.<br>
+    - $D_8$ = Position $\frac{8N}{10} = \frac{4824}{10} = 482.4$.<br>
+    - $P_{65}$ = Position $\frac{65N}{100} = 391.95$.<br>
+    Har partition value ke liye corresponding class dhoond kar standard interpolation formula lagana hai.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Cumulative Frequency Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class Interval</th><th>Frequency ($f$)</th><th>Cumulative Frequency ($cf$)</th></tr></thead>
+        <tbody>
+          <tr><td>20–30</td><td>69</td><td>69</td></tr>
+          <tr><td>30–40</td><td>167</td><td>236</td></tr>
+          <tr><td>40–50</td><td>207</td><td>443</td></tr>
+          <tr><td>50–60</td><td>65</td><td>508</td></tr>
+          <tr><td>60–70</td><td>58</td><td>566</td></tr>
+          <tr><td>70–80</td><td>27</td><td>593</td></tr>
+          <tr><td>80–90</td><td>10</td><td>603</td></tr>
+        </tbody>
+        <tfoot><tr><td>Total</td><td><strong>$N = 603$</strong></td><td>—</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Calculate First Quartile ($Q_1$)</span>
+    </div>
+    <p>Position: $\frac{N}{4} = 150.75 \implies$ Class <strong>30–40</strong> ($L = 30, cf = 69, f = 167, h = 10$).</p>
+    <div class="formula-box">
+      $$Q_1 = 30 + \left( \frac{150.75 - 69}{167} \right) \times 10 = 30 + \left( \frac{81.75}{167} \right) \times 10 = 30 + 4.8952 = \mathbf{34.8952}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate 8th Decile ($D_8$)</span>
+    </div>
+    <p>Position: $\frac{8N}{10} = 482.4 \implies$ Class <strong>50–60</strong> ($L = 50, cf = 443, f = 65, h = 10$).</p>
+    <div class="formula-box">
+      $$D_8 = 50 + \left( \frac{482.4 - 443}{65} \right) \times 10 = 50 + \left( \frac{39.4}{65} \right) \times 10 = 50 + 6.0615 = \mathbf{56.0615}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Calculate 65th Percentile ($P_{65}$)</span>
+    </div>
+    <p>Position: $\frac{65N}{100} = 391.95 \implies$ Class <strong>40–50</strong> ($L = 40, cf = 236, f = 207, h = 10$).</p>
+    <div class="formula-box">
+      $$P_{65} = 40 + \left( \frac{391.95 - 236}{207} \right) \times 10 = 40 + \left( \frac{155.95}{207} \right) \times 10 = 40 + 7.5338 = \mathbf{47.5338}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>First Quartile ($Q_1$) = <strong>34.90</strong></li>
+      <li>Eighth Decile ($D_8$) = <strong>56.06</strong></li>
+      <li>65th Percentile ($P_{65}$) = <strong>47.53</strong></li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 7: Mean Deviation about Mean and Median</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the mean deviation about mean and mean deviation about median for the following data:<br>
+    <strong>Data values:</strong> $3, 9, 5, 3, 12, 10, 18, 4, 7, 19, 21$
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - Total items $n = 11$.<br>
+    - <strong>Part 1:</strong> Sum nikalo $\sum x = 111$, Mean = $\frac{111}{11} = 10.0909$. Fir har value ka $|x - \bar{x}|$ nikaal kar average lo.<br>
+    - <strong>Part 2:</strong> Values ko ascending order me arrange karo. Middle value (6th term) Median hogi = $9$. Fir $|x - 9|$ nikaal kar average lo.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Part A: Mean Deviation about Mean</span>
+    </div>
+    <p>$$\sum x_i = 3 + 9 + 5 + 3 + 12 + 10 + 18 + 4 + 7 + 19 + 21 = 111$$</p>
+    <p>$$\bar{x} = \frac{111}{11} \approx 10.0909$$</p>
+    <p>Absolute deviations from Mean $|x_i - 10.0909|$:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>$|x_i - \bar{x}|$</th><th>$x_i$</th><th>$|x_i - \bar{x}|$</th></tr></thead>
+        <tbody>
+          <tr><td>3</td><td>7.0909</td><td>18</td><td>7.9091</td></tr>
+          <tr><td>9</td><td>1.0909</td><td>4</td><td>6.0909</td></tr>
+          <tr><td>5</td><td>5.0909</td><td>7</td><td>3.0909</td></tr>
+          <tr><td>3</td><td>7.0909</td><td>19</td><td>8.9091</td></tr>
+          <tr><td>12</td><td>1.9091</td><td>21</td><td>10.9091</td></tr>
+          <tr><td>10</td><td>0.0909</td><td><strong>Total</strong></td><td><strong>$\sum |x_i - \bar{x}| = 59.2727$</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula-box">
+      $$MD(\bar{x}) = \frac{\sum |x_i - \bar{x}|}{n} = \frac{59.2727}{11} \approx \mathbf{5.3884}$$
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Part B: Mean Deviation about Median</span>
+    </div>
+    <p>Arranging data in ascending order: $$3, 3, 4, 5, 7, \mathbf{9}, 10, 12, 18, 19, 21$$</p>
+    <p>Since $n = 11$ (odd): $$\text{Median } (M) = \left(\frac{11+1}{2}\right)\text{-th term} = 6\text{-th term} = \mathbf{9}$$</p>
+    <p>Absolute deviations from Median $|x_i - 9|$:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>$|x_i - 9|$</th><th>$x_i$</th><th>$|x_i - 9|$</th></tr></thead>
+        <tbody>
+          <tr><td>3</td><td>$|3 - 9| = 6$</td><td>10</td><td>$|10 - 9| = 1$</td></tr>
+          <tr><td>3</td><td>$|3 - 9| = 6$</td><td>12</td><td>$|12 - 9| = 3$</td></tr>
+          <tr><td>4</td><td>$|4 - 9| = 5$</td><td>18</td><td>$|18 - 9| = 9$</td></tr>
+          <tr><td>5</td><td>$|5 - 9| = 4$</td><td>19</td><td>$|19 - 9| = 10$</td></tr>
+          <tr><td>7</td><td>$|7 - 9| = 2$</td><td>21</td><td>$|21 - 9| = 12$</td></tr>
+          <tr><td>9</td><td>$|9 - 9| = 0$</td><td><strong>Total</strong></td><td><strong>$\sum |x_i - M| = 58$</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula-box">
+      $$MD(M) = \frac{\sum |x_i - M|}{n} = \frac{58}{11} \approx \mathbf{5.2727}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Mean = <strong>10.09</strong></li>
+      <li>Mean Deviation about Mean = <strong>5.39</strong></li>
+      <li>Median = <strong>9</strong></li>
+      <li>Mean Deviation about Median = <strong>5.27</strong> (or $\frac{58}{11}$)</li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 8: Mean Deviation about Median</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the mean deviation about median for the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>3</th><th>6</th><th>9</th><th>12</th><th>13</th><th>15</th><th>21</th><th>22</th></tr></thead>
+        <tbody><tr><td><strong>$f_i$</strong></td><td>3</td><td>4</td><td>5</td><td>2</td><td>4</td><td>5</td><td>4</td><td>3</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    1. Pehle cumulative frequency $cf$ banakar Median $M$ find karte hain ($N/2 = 15$).<br>
+    2. $cf \ge 15$ corresponds to $x = 13$, so Median = $13$.<br>
+    3. Fir har $x_i$ ke liye $|x_i - 13|$ nikalo, usko $f_i$ se multiply karo aur sum ko $N$ se divide karo.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Determine Median and Cumulative Frequency</span>
+    </div>
+    <p>Total Frequency $N = \sum f_i = 30$.</p>
+    <p>Median position = $\frac{N}{2} = 15$. In the $cf$ column, $cf \ge 15$ is <strong>18</strong>, which corresponds to $x_i = \mathbf{13}$.</p>
+    <p>$$\text{Median } (M) = 13$$</p>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Table of Absolute Deviations</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>$x_i$</th>
+            <th>$f_i$</th>
+            <th>$cf$</th>
+            <th>$|x_i - M| = |x_i - 13|$</th>
+            <th>$f_i |x_i - M|$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>3</td><td>3</td><td>3</td><td>$|3 - 13| = 10$</td><td>$3 \times 10 = 30$</td></tr>
+          <tr><td>6</td><td>4</td><td>7</td><td>$|6 - 13| = 7$</td><td>$4 \times 7 = 28$</td></tr>
+          <tr><td>9</td><td>5</td><td>12</td><td>$|9 - 13| = 4$</td><td>$5 \times 4 = 20$</td></tr>
+          <tr><td>12</td><td>2</td><td>14</td><td>$|12 - 13| = 1$</td><td>$2 \times 1 = 2$</td></tr>
+          <tr><td>13</td><td>4</td><td>18</td><td>$|13 - 13| = 0$</td><td>$4 \times 0 = 0$</td></tr>
+          <tr><td>15</td><td>5</td><td>23</td><td>$|15 - 13| = 2$</td><td>$5 \times 2 = 10$</td></tr>
+          <tr><td>21</td><td>4</td><td>27</td><td>$|21 - 13| = 8$</td><td>$4 \times 8 = 32$</td></tr>
+          <tr><td>22</td><td>3</td><td>30</td><td>$|22 - 13| = 9$</td><td>$3 \times 9 = 27$</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 30$</strong></td>
+            <td>—</td>
+            <td>—</td>
+            <td><strong>$\sum f_i |x_i - M| = 149$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate Mean Deviation about Median</span>
+    </div>
+    <div class="formula-box">
+      $$MD(\text{Median}) = \frac{\sum f_i |x_i - M|}{N} = \frac{149}{30} \approx \mathbf{4.9667}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Median ($M$) = <strong>13</strong></li>
+      <li>Mean Deviation about Median = <strong>4.97</strong> (or $\frac{149}{30}$)</li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 9: Find D₆, P₂₀ and P₁₀₀</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find $D_6$, $P_{20}$ and $P_{100}$ from the following data:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class</th><th>0–10</th><th>10–20</th><th>20–30</th><th>30–40</th><th>40–50</th><th>50–60</th></tr></thead>
+        <tbody><tr><td><strong>Frequency</strong></td><td>5</td><td>8</td><td>21</td><td>8</td><td>5</td><td>4</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - Total frequency $N = 51$.<br>
+    - $D_6$ position = $\frac{6 \times 51}{10} = 30.6$.<br>
+    - $P_{20}$ position = $\frac{20 \times 51}{100} = 10.2$.<br>
+    - $P_{100}$ position = $51$ (jo distribution ki upper limit $60$ ko represent karta hai).
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Cumulative Frequency Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class Interval</th><th>Frequency ($f$)</th><th>Cumulative Frequency ($cf$)</th></tr></thead>
+        <tbody>
+          <tr><td>0–10</td><td>5</td><td>5</td></tr>
+          <tr><td>10–20</td><td>8</td><td>13</td></tr>
+          <tr><td>20–30</td><td>21</td><td>34</td></tr>
+          <tr><td>30–40</td><td>8</td><td>42</td></tr>
+          <tr><td>40–50</td><td>5</td><td>47</td></tr>
+          <tr><td>50–60</td><td>4</td><td>51</td></tr>
+        </tbody>
+        <tfoot><tr><td>Total</td><td><strong>$N = 51$</strong></td><td>—</td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Calculate 6th Decile ($D_6$)</span>
+    </div>
+    <p>Position: $\frac{6N}{10} = 30.6 \implies$ Class <strong>20–30</strong> ($L = 20, cf = 13, f = 21, h = 10$).</p>
+    <div class="formula-box">
+      $$D_6 = 20 + \left( \frac{30.6 - 13}{21} \right) \times 10 = 20 + \left( \frac{17.6}{21} \right) \times 10 = 20 + \frac{176}{21} \approx \mathbf{28.3810}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Calculate 20th Percentile ($P_{20}$)</span>
+    </div>
+    <p>Position: $\frac{20N}{100} = 10.2 \implies$ Class <strong>10–20</strong> ($L = 10, cf = 5, f = 8, h = 10$).</p>
+    <div class="formula-box">
+      $$P_{20} = 10 + \left( \frac{10.2 - 5}{8} \right) \times 10 = 10 + \left( \frac{5.2}{8} \right) \times 10 = 10 + 6.5 = \mathbf{16.5}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Calculate 100th Percentile ($P_{100}$)</span>
+    </div>
+    <p>Position: $\frac{100N}{100} = 51 \implies$ Highest Class <strong>50–60</strong> ($L = 50, cf = 47, f = 4, h = 10$).</p>
+    <div class="formula-box">
+      $$P_{100} = 50 + \left( \frac{51 - 47}{4} \right) \times 10 = 50 + \left( \frac{4}{4} \right) \times 10 = 50 + 10 = \mathbf{60}$$
+      <p style="font-size: 0.9rem; color: #64748b; margin-top: 6px;"><em>(Note: 100th percentile is the maximum boundary value of the distribution = 60)</em></p>
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>$D_6$ = <strong>28.38</strong></li>
+      <li>$P_{20}$ = <strong>16.5</strong></li>
+      <li>$P_{100}$ = <strong>60</strong></li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 10: Find Missing Frequencies f₁ and f₂</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the missing frequencies $f_1$ and $f_2$ of the following distribution, given that the <strong>mean is 21.4</strong> and <strong>total frequency is 40</strong>:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Class-Interval</th><th>0–8</th><th>8–16</th><th>16–24</th><th>24–32</th><th>32–40</th></tr></thead>
+        <tbody><tr><td><strong>Frequency</strong></td><td>6</td><td>$f_1$</td><td>10</td><td>$f_2$</td><td>9</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    Yahan 2 unknowns ($f_1$ aur $f_2$) hain, isliye 2 equations banengi:<br>
+    - <strong>Equation 1:</strong> Total frequency = $40 \implies f_1 + f_2 = 15$.<br>
+    - <strong>Equation 2:</strong> Mean = $21.4 \implies \frac{\sum f_i x_i}{40} = 21.4$.<br>
+    Dono ko solve karke exact integer answers mil jaate hain!
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Construct Calculation Table with Mid-values</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Class Interval</th>
+            <th>Frequency ($f_i$)</th>
+            <th>Mid-point ($x_i$)</th>
+            <th>$f_i x_i$</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>0–8</td><td>6</td><td>4</td><td>$6 \times 4 = 24$</td></tr>
+          <tr><td>8–16</td><td>$f_1$</td><td>12</td><td>$12 f_1$</td></tr>
+          <tr><td>16–24</td><td>10</td><td>20</td><td>$10 \times 20 = 200$</td></tr>
+          <tr><td>24–32</td><td>$f_2$</td><td>28</td><td>$28 f_2$</td></tr>
+          <tr><td>32–40</td><td>9</td><td>36</td><td>$9 \times 36 = 324$</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 40$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum f_i x_i = 548 + 12f_1 + 28f_2$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Form Equation (1) from Total Frequency</span>
+    </div>
+    <div class="formula-box">
+      $$6 + f_1 + 10 + f_2 + 9 = 40$$
+      $$25 + f_1 + f_2 = 40$$
+      $$f_1 + f_2 = 15 \quad \text{--- [Equation 1]}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Form Equation (2) from Given Mean (21.4)</span>
+    </div>
+    <div class="formula-box">
+      $$\bar{x} = \frac{\sum f_i x_i}{N} = 21.4$$
+      $$\frac{548 + 12f_1 + 28f_2}{40} = 21.4$$
+      $$548 + 12f_1 + 28f_2 = 40 \times 21.4 = 856$$
+      $$12f_1 + 28f_2 = 856 - 548 = 308$$
+      Divide entire equation by $4$:
+      $$3f_1 + 7f_2 = 77 \quad \text{--- [Equation 2]}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Solve the Equations Simultaneously</span>
+    </div>
+    <p>From Equation 1: $f_1 = 15 - f_2$. Substitute into Equation 2:</p>
+    <div class="formula-box">
+      $$3(15 - f_2) + 7f_2 = 77$$
+      $$45 - 3f_2 + 7f_2 = 77$$
+      $$4f_2 = 77 - 45 = 32$$
+      $$f_2 = \frac{32}{4} = \mathbf{8}$$
+    </div>
+    <p>Now calculate $f_1$:</p>
+    <div class="formula-box">
+      $$f_1 = 15 - f_2 = 15 - 8 = \mathbf{7}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>$f_1 = \mathbf{7}$</li>
+      <li>$f_2 = \mathbf{8}$</li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 11: Find Missing Frequencies f₁ and f₂</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the missing frequencies $f_1$ and $f_2$ for the following data whose <strong>mean is 1.46</strong> and <strong>total frequency is 200</strong>:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+        <tbody><tr><td><strong>$f_i$</strong></td><td>46</td><td>$f_1$</td><td>$f_2$</td><td>25</td><td>10</td><td>5</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - Yeh discrete series hai ($x_i$ direct values hain).<br>
+    - Total frequency $N = 200 \implies f_1 + f_2 = 114$.<br>
+    - Mean $\bar{x} = 1.46 \implies \sum f_i x_i = 200 \times 1.46 = 292$.<br>
+    - Dono linear equations ko subtract karke $f_1$ aur $f_2$ aasani se mil jate hain.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Construct Calculation Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>$f_i$</th><th>$f_i x_i$</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>46</td><td>$46 \times 0 = 0$</td></tr>
+          <tr><td>1</td><td>$f_1$</td><td>$f_1 \times 1 = f_1$</td></tr>
+          <tr><td>2</td><td>$f_2$</td><td>$f_2 \times 2 = 2f_2$</td></tr>
+          <tr><td>3</td><td>25</td><td>$25 \times 3 = 75$</td></tr>
+          <tr><td>4</td><td>10</td><td>$10 \times 4 = 40$</td></tr>
+          <tr><td>5</td><td>5</td><td>$5 \times 5 = 25$</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 200$</strong></td>
+            <td><strong>$\sum f_i x_i = 140 + f_1 + 2f_2$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Form Equation (1) from Total Frequency</span>
+    </div>
+    <div class="formula-box">
+      $$46 + f_1 + f_2 + 25 + 10 + 5 = 200$$
+      $$86 + f_1 + f_2 = 200$$
+      $$f_1 + f_2 = 114 \quad \text{--- [Equation 1]}$$
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">3</span>
+      <span class="step-title">Step 3: Form Equation (2) from Mean (1.46)</span>
+    </div>
+    <div class="formula-box">
+      $$\bar{x} = \frac{\sum f_i x_i}{N} = 1.46$$
+      $$\frac{140 + f_1 + 2f_2}{200} = 1.46$$
+      $$140 + f_1 + 2f_2 = 200 \times 1.46 = 292$$
+      $$f_1 + 2f_2 = 292 - 140 = 152 \quad \text{--- [Equation 2]}$$
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">4</span>
+      <span class="step-title">Step 4: Solve Simultaneous Equations</span>
+    </div>
+    <p>Subtract Equation 1 from Equation 2:</p>
+    <div class="formula-box">
+      $$(f_1 + 2f_2) - (f_1 + f_2) = 152 - 114$$
+      $$f_2 = \mathbf{38}$$
+    </div>
+    <p>Substitute $f_2 = 38$ into Equation 1:</p>
+    <div class="formula-box">
+      $$f_1 + 38 = 114 \implies f_1 = 114 - 38 = \mathbf{76}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>$f_1 = \mathbf{76}$</li>
+      <li>$f_2 = \mathbf{38}$</li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 12: Find the Harmonic Mean</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the Harmonic Mean for the following distribution:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Marks ($x_i$)</th><th>20</th><th>30</th><th>40</th><th>50</th><th>60</th><th>70</th><th>80</th></tr></thead>
+        <tbody><tr><td><strong>Frequency ($f_i$)</strong></td><td>3</td><td>61</td><td>132</td><td>153</td><td>140</td><td>51</td><td>3</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    Harmonic Mean ka formula: $HM = \frac{N}{\sum \left(\frac{f_i}{x_i}\right)}$.<br>
+    Har frequency ko uske marks se divide karo, unka sum nikalo, fir total frequency $N = 543$ ko us sum se divide kar do.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Compute $\frac{f_i}{x_i}$ Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Marks ($x_i$)</th>
+            <th>Frequency ($f_i$)</th>
+            <th>$\frac{f_i}{x_i}$ (Fraction)</th>
+            <th>$\frac{f_i}{x_i}$ (Decimal)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>20</td><td>3</td><td>$\frac{3}{20}$</td><td>0.150000</td></tr>
+          <tr><td>30</td><td>61</td><td>$\frac{61}{30}$</td><td>2.033333</td></tr>
+          <tr><td>40</td><td>132</td><td>$\frac{132}{40}$</td><td>3.300000</td></tr>
+          <tr><td>50</td><td>153</td><td>$\frac{153}{50}$</td><td>3.060000</td></tr>
+          <tr><td>60</td><td>140</td><td>$\frac{140}{60}$</td><td>2.333333</td></tr>
+          <tr><td>70</td><td>51</td><td>$\frac{51}{70}$</td><td>0.728571</td></tr>
+          <tr><td>80</td><td>3</td><td>$\frac{3}{80}$</td><td>0.037500</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 543$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum \frac{f_i}{x_i} \approx 11.642738$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Harmonic Mean Formula & Calculation</span>
+    </div>
+    <div class="formula-box">
+      $$HM = \frac{N}{\sum \left( \frac{f_i}{x_i} \right)}$$
+      $$HM = \frac{543}{11.642738} \approx \mathbf{46.6385}$$
+      Rounding to two decimal places:
+      $$HM \approx \mathbf{46.64}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Total Frequency ($N$) = <strong>543</strong></li>
+      <li>$\sum (f_i / x_i)$ = <strong>11.6427</strong></li>
+      <li>Harmonic Mean (H.M.) = <strong>46.64</strong></li>
+    </ul>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div class="card">
+  <div class="card-title">📌 Question 13: Statistical Theory & Definitions</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong>
+    <ul style="margin-left: 20px; margin-top: 6px;">
+      <li>Define Range.</li>
+      <li>Define Mean Deviation.</li>
+      <li>Define Standard Deviation.</li>
+      <li>State Measures of Dispersion.</li>
+      <li>State Merits and Demerits of Mean, Median, and Mode.</li>
+    </ul>
+  </div>
+
+  <!-- Part 1 -->
+  <div class="theory-block">
+    <h4>1. Definition of Range</h4>
+    <p><strong>Definition:</strong> Range is the simplest and most elementary measure of dispersion. It is defined as the absolute difference between the largest (maximum) observation and the smallest (minimum) observation present in a given dataset.</p>
+    <div class="formula-box">
+      $$\text{Range} = L - S$$
+      $$\text{Coefficient of Range} = \frac{L - S}{L + S}$$
+      where $L = \text{Largest value}$, $S = \text{Smallest value}$.
+    </div>
+  </div>
+
+  <!-- Part 2 -->
+  <div class="theory-block">
+    <h4>2. Definition of Mean Deviation</h4>
+    <p><strong>Definition:</strong> Mean Deviation (or Average Deviation) is the arithmetic mean of the absolute values of the numerical deviations of observations taken from an average (usually the arithmetic mean or median). Algebraic signs (+ or -) are deliberately ignored.</p>
+    <div class="formula-box">
+      $$\text{For Individual Series: } MD = \frac{\sum |x_i - A|}{n}$$
+      $$\text{For Grouped Series: } MD = \frac{\sum f_i |x_i - A|}{N}$$
+      $$\text{Coefficient of } MD = \frac{MD}{A}$$
+      where $A$ is the Mean ($\bar{x}$) or Median ($M$).
+    </div>
+  </div>
+
+  <!-- Part 3 -->
+  <div class="theory-block">
+    <h4>3. Definition of Standard Deviation</h4>
+    <p><strong>Definition:</strong> Standard Deviation was introduced by Karl Pearson in 1893. It is defined as the <strong>positive square root of the arithmetic mean of the squared deviations of observations taken from their arithmetic mean</strong>. It is universally denoted by the Greek letter $\sigma$ (sigma).</p>
+    <div class="formula-box">
+      $$\sigma = \sqrt{\frac{\sum f_i (x_i - \bar{x})^2}{N}} = \sqrt{\frac{\sum f_i x_i^2}{N} - \left(\frac{\sum f_i x_i}{N}\right)^2}$$
+      $$\text{Variance} = \sigma^2$$
+    </div>
+  </div>
+
+  <!-- Part 4 -->
+  <div class="theory-block">
+    <h4>4. State Measures of Dispersion</h4>
+    <p>Dispersion represents the extent to which values in a distribution scatter around a central tendency. They are categorized into:</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px;">
+      <div style="background: #f8fafc; border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+        <strong style="color: #1e40af;">A. Absolute Measures (Have units)</strong>
+        <ol style="padding-left: 20px; margin-top: 6px; font-size: 0.95rem;">
+          <li>Range ($L - S$)</li>
+          <li>Quartile Deviation ($QD = \frac{Q_3 - Q_1}{2}$)</li>
+          <li>Mean Deviation</li>
+          <li>Standard Deviation & Variance</li>
+        </ol>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+        <strong style="color: #1e40af;">B. Relative Measures (Unit-free)</strong>
+        <ol style="padding-left: 20px; margin-top: 6px; font-size: 0.95rem;">
+          <li>Coefficient of Range = $\frac{L - S}{L + S}$</li>
+          <li>Coefficient of QD = $\frac{Q_3 - Q_1}{Q_3 + Q_1}$</li>
+          <li>Coefficient of MD = $\frac{MD}{\text{Mean/Median}}$</li>
+          <li>Coefficient of Variation (C.V.) = $\frac{\sigma}{\bar{x}} \times 100$</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Part 5 -->
+  <div class="theory-block">
+    <h4>5. Merits and Demerits of Mean, Median, and Mode</h4>
+
+    <!-- Mean -->
+    <h5 style="margin-top: 14px; color: #334155; font-size: 1.05rem;">A. Arithmetic Mean ($\bar{x}$)</h5>
+    <div class="merit-demerit-grid">
+      <div class="merits-box">
+        <h5>✅ Merits</h5>
+        <ul>
+          <li>Rigidly defined by a mathematical formula.</li>
+          <li>Based on all observations of the dataset.</li>
+          <li>Capable of further algebraic treatment (e.g., combined mean).</li>
+          <li>Least affected by sampling fluctuations (most stable).</li>
+        </ul>
+      </div>
+      <div class="demerits-box">
+        <h5>❌ Demerits</h5>
+        <ul>
+          <li>Highly sensitive to extreme values (outliers).</li>
+          <li>Cannot be calculated for open-ended classes without assumptions.</li>
+          <li>Cannot be determined graphically.</li>
+          <li>Cannot be measured for qualitative data (honesty, beauty).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Median -->
+    <h5 style="margin-top: 18px; color: #334155; font-size: 1.05rem;">B. Median ($M$)</h5>
+    <div class="merit-demerit-grid">
+      <div class="merits-box">
+        <h5>✅ Merits</h5>
+        <ul>
+          <li>Easy to understand and compute.</li>
+          <li>Completely unaffected by extreme values / outliers.</li>
+          <li>Can be calculated for open-ended frequency distributions.</li>
+          <li>Can be determined graphically using Ogive curves.</li>
+          <li>Ideal measure for qualitative data.</li>
+        </ul>
+      </div>
+      <div class="demerits-box">
+        <h5>❌ Demerits</h5>
+        <ul>
+          <li>Not based on all items (depends only on middle position).</li>
+          <li>Not amenable to algebraic treatment (cannot combine medians).</li>
+          <li>Requires sorting/ranking of data (laborious for large data).</li>
+          <li>Less stable under sampling fluctuations than mean.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mode -->
+    <h5 style="margin-top: 18px; color: #334155; font-size: 1.05rem;">C. Mode ($Z$)</h5>
+    <div class="merit-demerit-grid">
+      <div class="merits-box">
+        <h5>✅ Merits</h5>
+        <ul>
+          <li>Easiest to understand; can often be determined by inspection.</li>
+          <li>Unaffected by extreme values.</li>
+          <li>Can be computed for open-ended classes.</li>
+          <li>Can be determined graphically using a Histogram.</li>
+          <li>Very practical for trade and industry (popular sizes).</li>
+        </ul>
+      </div>
+      <div class="demerits-box">
+        <h5>❌ Demerits</h5>
+        <ul>
+          <li>Ill-defined in bimodal, multimodal, or uniform distributions.</li>
+          <li>Not based on all observations in the dataset.</li>
+          <li>Not capable of further algebraic manipulation.</li>
+          <li>Most unstable average under sampling fluctuations.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Summary:</h3>
+    <p>All theoretical questions answered comprehensively with clear mathematical definitions, formulae, classifications, and side-by-side merit/demerit comparisons.</p>
+  </div>
+</div>
+
+<hr style='margin: 32px 0; border: none; border-top: 2px dashed #cbd5e1;'>
+
+<div style="text-align: center; margin: 30px 0;">
+  <a href="index.html" class="btn btn-primary" style="padding: 12px 24px; font-size: 1.05rem;">🏠 Back to Dashboard</a>
+</div>
+
+<footer>
+  <p>Statistics Assignment 1 Solutions &bull; Easy Step-by-Step Guide</p>
+</footer>
+</div>
+</body>
+</html>

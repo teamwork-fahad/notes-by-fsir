@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question 13 Solution - Statistics Assignment 1</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 24px 16px;
+    }
+    .container { max-width: 920px; margin: 0 auto; }
+    .header-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+      color: white;
+      padding: 28px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 24px;
+    }
+    .header-banner h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+    .header-banner p { color: #bfdbfe; font-size: 1rem; }
+    .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: white; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .question-box {
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 22px;
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+    .step-container {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .step-container:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .step-num {
+      background: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title { font-size: 1.15rem; font-weight: 600; color: #1e293b; }
+    .easy-note {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-left: 4px solid #eab308;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+      color: #713f12;
+    }
+    .easy-note strong { color: #854d0e; }
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    thead th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+      padding: 11px 13px;
+      border-bottom: 2px solid var(--border);
+    }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    tbody tr:nth-child(even) { background-color: #fafbfc; }
+    tbody tr:hover { background-color: #f1f5f9; }
+    tfoot tr {
+      background: #f8fafc;
+      font-weight: 700;
+      border-top: 2px solid var(--border);
+    }
+    tfoot td { padding: 11px 13px; }
+    .formula-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 1.05rem;
+    }
+    .answer-box {
+      background: var(--success-light);
+      border: 2px solid #86efac;
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-top: 24px;
+    }
+    .answer-box h3 {
+      color: var(--success);
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .answer-box ul { list-style: none; padding-left: 0; }
+    .answer-box li {
+      padding: 5px 0;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #166534;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .q-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+    }
+    .q-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    .q-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .q-card-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+    .q-card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+    .q-card-footer {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .theory-block {
+      margin-bottom: 22px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .theory-block h4 {
+      color: #1e40af;
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #dbeafe;
+      padding-bottom: 5px;
+    }
+    .merit-demerit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 640px) {
+      .merit-demerit-grid { grid-template-columns: 1fr; }
+    }
+    .merits-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .demerits-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .merits-box h5 { color: #166534; margin-bottom: 6px; font-size: 0.95rem; }
+    .demerits-box h5 { color: #991b1b; margin-bottom: 6px; font-size: 0.95rem; }
+    .merits-box ul, .demerits-box ul { padding-left: 18px; font-size: 0.9rem; }
+    .merits-box li, .demerits-box li { margin-bottom: 5px; }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .btn, .nav-bar, footer { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .header-banner { background: #2563eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<div class="header-banner">
+  <h1>Question 13 Solution</h1>
+  <p>Question 13: Statistical Definitions & Theory</p>
+  <div class="badge-row">
+    <span class="badge badge-blue">Statistical Theory</span>
+    <span class="badge badge-blue">Step-by-Step Easy Guide</span>
+    <span class="badge badge-green">Verified Accurate</span>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="question_12.html" class="btn btn-outline">⬅️ Question 12</a>
+  <div style="display:flex; gap:8px;">
+    <a href="index.html" class="btn btn-outline">📋 Index</a>
+    <a href="all_questions.html" class="btn btn-outline">📑 All Solutions (1 Page)</a>
+  </div>
+  <a href="index.html" class="btn btn-primary">Back to Home 🏠</a>
+</div>
+
+<div class="card">
+  <div class="card-title">📌 Question 13: Statistical Theory & Definitions</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong>
+    <ul style="margin-left: 20px; margin-top: 6px;">
+      <li>Define Range.</li>
+      <li>Define Mean Deviation.</li>
+      <li>Define Standard Deviation.</li>
+      <li>State Measures of Dispersion.</li>
+      <li>State Merits and Demerits of Mean, Median, and Mode.</li>
+    </ul>
+  </div>
+
+  <!-- Part 1 -->
+  <div class="theory-block">
+    <h4>1. Definition of Range</h4>
+    <p><strong>Definition:</strong> Range is the simplest and most elementary measure of dispersion. It is defined as the absolute difference between the largest (maximum) observation and the smallest (minimum) observation present in a given dataset.</p>
+    <div class="formula-box">
+      $$\text{Range} = L - S$$
+      $$\text{Coefficient of Range} = \frac{L - S}{L + S}$$
+      where $L = \text{Largest value}$, $S = \text{Smallest value}$.
+    </div>
+  </div>
+
+  <!-- Part 2 -->
+  <div class="theory-block">
+    <h4>2. Definition of Mean Deviation</h4>
+    <p><strong>Definition:</strong> Mean Deviation (or Average Deviation) is the arithmetic mean of the absolute values of the numerical deviations of observations taken from an average (usually the arithmetic mean or median). Algebraic signs (+ or -) are deliberately ignored.</p>
+    <div class="formula-box">
+      $$\text{For Individual Series: } MD = \frac{\sum |x_i - A|}{n}$$
+      $$\text{For Grouped Series: } MD = \frac{\sum f_i |x_i - A|}{N}$$
+      $$\text{Coefficient of } MD = \frac{MD}{A}$$
+      where $A$ is the Mean ($\bar{x}$) or Median ($M$).
+    </div>
+  </div>
+
+  <!-- Part 3 -->
+  <div class="theory-block">
+    <h4>3. Definition of Standard Deviation</h4>
+    <p><strong>Definition:</strong> Standard Deviation was introduced by Karl Pearson in 1893. It is defined as the <strong>positive square root of the arithmetic mean of the squared deviations of observations taken from their arithmetic mean</strong>. It is universally denoted by the Greek letter $\sigma$ (sigma).</p>
+    <div class="formula-box">
+      $$\sigma = \sqrt{\frac{\sum f_i (x_i - \bar{x})^2}{N}} = \sqrt{\frac{\sum f_i x_i^2}{N} - \left(\frac{\sum f_i x_i}{N}\right)^2}$$
+      $$\text{Variance} = \sigma^2$$
+    </div>
+  </div>
+
+  <!-- Part 4 -->
+  <div class="theory-block">
+    <h4>4. State Measures of Dispersion</h4>
+    <p>Dispersion represents the extent to which values in a distribution scatter around a central tendency. They are categorized into:</p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 10px;">
+      <div style="background: #f8fafc; border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+        <strong style="color: #1e40af;">A. Absolute Measures (Have units)</strong>
+        <ol style="padding-left: 20px; margin-top: 6px; font-size: 0.95rem;">
+          <li>Range ($L - S$)</li>
+          <li>Quartile Deviation ($QD = \frac{Q_3 - Q_1}{2}$)</li>
+          <li>Mean Deviation</li>
+          <li>Standard Deviation & Variance</li>
+        </ol>
+      </div>
+      <div style="background: #f8fafc; border: 1px solid var(--border); padding: 14px; border-radius: 8px;">
+        <strong style="color: #1e40af;">B. Relative Measures (Unit-free)</strong>
+        <ol style="padding-left: 20px; margin-top: 6px; font-size: 0.95rem;">
+          <li>Coefficient of Range = $\frac{L - S}{L + S}$</li>
+          <li>Coefficient of QD = $\frac{Q_3 - Q_1}{Q_3 + Q_1}$</li>
+          <li>Coefficient of MD = $\frac{MD}{\text{Mean/Median}}$</li>
+          <li>Coefficient of Variation (C.V.) = $\frac{\sigma}{\bar{x}} \times 100$</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Part 5 -->
+  <div class="theory-block">
+    <h4>5. Merits and Demerits of Mean, Median, and Mode</h4>
+
+    <!-- Mean -->
+    <h5 style="margin-top: 14px; color: #334155; font-size: 1.05rem;">A. Arithmetic Mean ($\bar{x}$)</h5>
+    <div class="merit-demerit-grid">
+      <div class="merits-box">
+        <h5>✅ Merits</h5>
+        <ul>
+          <li>Rigidly defined by a mathematical formula.</li>
+          <li>Based on all observations of the dataset.</li>
+          <li>Capable of further algebraic treatment (e.g., combined mean).</li>
+          <li>Least affected by sampling fluctuations (most stable).</li>
+        </ul>
+      </div>
+      <div class="demerits-box">
+        <h5>❌ Demerits</h5>
+        <ul>
+          <li>Highly sensitive to extreme values (outliers).</li>
+          <li>Cannot be calculated for open-ended classes without assumptions.</li>
+          <li>Cannot be determined graphically.</li>
+          <li>Cannot be measured for qualitative data (honesty, beauty).</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Median -->
+    <h5 style="margin-top: 18px; color: #334155; font-size: 1.05rem;">B. Median ($M$)</h5>
+    <div class="merit-demerit-grid">
+      <div class="merits-box">
+        <h5>✅ Merits</h5>
+        <ul>
+          <li>Easy to understand and compute.</li>
+          <li>Completely unaffected by extreme values / outliers.</li>
+          <li>Can be calculated for open-ended frequency distributions.</li>
+          <li>Can be determined graphically using Ogive curves.</li>
+          <li>Ideal measure for qualitative data.</li>
+        </ul>
+      </div>
+      <div class="demerits-box">
+        <h5>❌ Demerits</h5>
+        <ul>
+          <li>Not based on all items (depends only on middle position).</li>
+          <li>Not amenable to algebraic treatment (cannot combine medians).</li>
+          <li>Requires sorting/ranking of data (laborious for large data).</li>
+          <li>Less stable under sampling fluctuations than mean.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Mode -->
+    <h5 style="margin-top: 18px; color: #334155; font-size: 1.05rem;">C. Mode ($Z$)</h5>
+    <div class="merit-demerit-grid">
+      <div class="merits-box">
+        <h5>✅ Merits</h5>
+        <ul>
+          <li>Easiest to understand; can often be determined by inspection.</li>
+          <li>Unaffected by extreme values.</li>
+          <li>Can be computed for open-ended classes.</li>
+          <li>Can be determined graphically using a Histogram.</li>
+          <li>Very practical for trade and industry (popular sizes).</li>
+        </ul>
+      </div>
+      <div class="demerits-box">
+        <h5>❌ Demerits</h5>
+        <ul>
+          <li>Ill-defined in bimodal, multimodal, or uniform distributions.</li>
+          <li>Not based on all observations in the dataset.</li>
+          <li>Not capable of further algebraic manipulation.</li>
+          <li>Most unstable average under sampling fluctuations.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Summary:</h3>
+    <p>All theoretical questions answered comprehensively with clear mathematical definitions, formulae, classifications, and side-by-side merit/demerit comparisons.</p>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="question_12.html" class="btn btn-outline">⬅️ Question 12</a>
+  <div style="display:flex; gap:8px;">
+    <a href="index.html" class="btn btn-outline">📋 Index</a>
+    <a href="all_questions.html" class="btn btn-outline">📑 All Solutions (1 Page)</a>
+  </div>
+  <a href="index.html" class="btn btn-primary">Back to Home 🏠</a>
+</div>
+
+<footer>
+  <p>Statistics Assignment 1 Solutions &bull; Easy Step-by-Step Guide</p>
+</footer>
+</div>
+</body>
+</html>

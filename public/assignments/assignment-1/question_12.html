@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question 12 Solution - Statistics Assignment 1</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 24px 16px;
+    }
+    .container { max-width: 920px; margin: 0 auto; }
+    .header-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+      color: white;
+      padding: 28px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 24px;
+    }
+    .header-banner h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+    .header-banner p { color: #bfdbfe; font-size: 1rem; }
+    .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: white; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .question-box {
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 22px;
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+    .step-container {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .step-container:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .step-num {
+      background: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title { font-size: 1.15rem; font-weight: 600; color: #1e293b; }
+    .easy-note {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-left: 4px solid #eab308;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+      color: #713f12;
+    }
+    .easy-note strong { color: #854d0e; }
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    thead th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+      padding: 11px 13px;
+      border-bottom: 2px solid var(--border);
+    }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    tbody tr:nth-child(even) { background-color: #fafbfc; }
+    tbody tr:hover { background-color: #f1f5f9; }
+    tfoot tr {
+      background: #f8fafc;
+      font-weight: 700;
+      border-top: 2px solid var(--border);
+    }
+    tfoot td { padding: 11px 13px; }
+    .formula-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 1.05rem;
+    }
+    .answer-box {
+      background: var(--success-light);
+      border: 2px solid #86efac;
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-top: 24px;
+    }
+    .answer-box h3 {
+      color: var(--success);
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .answer-box ul { list-style: none; padding-left: 0; }
+    .answer-box li {
+      padding: 5px 0;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #166534;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .q-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+    }
+    .q-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    .q-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .q-card-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+    .q-card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+    .q-card-footer {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .theory-block {
+      margin-bottom: 22px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .theory-block h4 {
+      color: #1e40af;
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #dbeafe;
+      padding-bottom: 5px;
+    }
+    .merit-demerit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 640px) {
+      .merit-demerit-grid { grid-template-columns: 1fr; }
+    }
+    .merits-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .demerits-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .merits-box h5 { color: #166534; margin-bottom: 6px; font-size: 0.95rem; }
+    .demerits-box h5 { color: #991b1b; margin-bottom: 6px; font-size: 0.95rem; }
+    .merits-box ul, .demerits-box ul { padding-left: 18px; font-size: 0.9rem; }
+    .merits-box li, .demerits-box li { margin-bottom: 5px; }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .btn, .nav-bar, footer { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .header-banner { background: #2563eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<div class="header-banner">
+  <h1>Question 12 Solution</h1>
+  <p>Question 12: Harmonic Mean (H.M.)</p>
+  <div class="badge-row">
+    <span class="badge badge-blue">Central Tendency</span>
+    <span class="badge badge-blue">Step-by-Step Easy Guide</span>
+    <span class="badge badge-green">Verified Accurate</span>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="question_11.html" class="btn btn-outline">⬅️ Question 11</a>
+  <div style="display:flex; gap:8px;">
+    <a href="index.html" class="btn btn-outline">📋 Index</a>
+    <a href="all_questions.html" class="btn btn-outline">📑 All Solutions (1 Page)</a>
+  </div>
+  <a href="question_13.html" class="btn btn-primary">Question 13 ➡️</a>
+</div>
+
+<div class="card">
+  <div class="card-title">📌 Question 12: Find the Harmonic Mean</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the Harmonic Mean for the following distribution:
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>Marks ($x_i$)</th><th>20</th><th>30</th><th>40</th><th>50</th><th>60</th><th>70</th><th>80</th></tr></thead>
+        <tbody><tr><td><strong>Frequency ($f_i$)</strong></td><td>3</td><td>61</td><td>132</td><td>153</td><td>140</td><td>51</td><td>3</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    Harmonic Mean ka formula: $HM = \frac{N}{\sum \left(\frac{f_i}{x_i}\right)}$.<br>
+    Har frequency ko uske marks se divide karo, unka sum nikalo, fir total frequency $N = 543$ ko us sum se divide kar do.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Step 1: Compute $\frac{f_i}{x_i}$ Table</span>
+    </div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Marks ($x_i$)</th>
+            <th>Frequency ($f_i$)</th>
+            <th>$\frac{f_i}{x_i}$ (Fraction)</th>
+            <th>$\frac{f_i}{x_i}$ (Decimal)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>20</td><td>3</td><td>$\frac{3}{20}$</td><td>0.150000</td></tr>
+          <tr><td>30</td><td>61</td><td>$\frac{61}{30}$</td><td>2.033333</td></tr>
+          <tr><td>40</td><td>132</td><td>$\frac{132}{40}$</td><td>3.300000</td></tr>
+          <tr><td>50</td><td>153</td><td>$\frac{153}{50}$</td><td>3.060000</td></tr>
+          <tr><td>60</td><td>140</td><td>$\frac{140}{60}$</td><td>2.333333</td></tr>
+          <tr><td>70</td><td>51</td><td>$\frac{51}{70}$</td><td>0.728571</td></tr>
+          <tr><td>80</td><td>3</td><td>$\frac{3}{80}$</td><td>0.037500</td></tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total</td>
+            <td><strong>$N = 543$</strong></td>
+            <td>—</td>
+            <td><strong>$\sum \frac{f_i}{x_i} \approx 11.642738$</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Step 2: Harmonic Mean Formula & Calculation</span>
+    </div>
+    <div class="formula-box">
+      $$HM = \frac{N}{\sum \left( \frac{f_i}{x_i} \right)}$$
+      $$HM = \frac{543}{11.642738} \approx \mathbf{46.6385}$$
+      Rounding to two decimal places:
+      $$HM \approx \mathbf{46.64}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Total Frequency ($N$) = <strong>543</strong></li>
+      <li>$\sum (f_i / x_i)$ = <strong>11.6427</strong></li>
+      <li>Harmonic Mean (H.M.) = <strong>46.64</strong></li>
+    </ul>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="question_11.html" class="btn btn-outline">⬅️ Question 11</a>
+  <div style="display:flex; gap:8px;">
+    <a href="index.html" class="btn btn-outline">📋 Index</a>
+    <a href="all_questions.html" class="btn btn-outline">📑 All Solutions (1 Page)</a>
+  </div>
+  <a href="question_13.html" class="btn btn-primary">Question 13 ➡️</a>
+</div>
+
+<footer>
+  <p>Statistics Assignment 1 Solutions &bull; Easy Step-by-Step Guide</p>
+</footer>
+</div>
+</body>
+</html>

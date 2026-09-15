@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question 7 Solution - Statistics Assignment 1</title>
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre']
+      },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+  </script>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --warning: #d97706;
+      --warning-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
+      --radius: 12px;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.65;
+      padding: 24px 16px;
+    }
+    .container { max-width: 920px; margin: 0 auto; }
+    .header-banner {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+      color: white;
+      padding: 28px 24px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 24px;
+    }
+    .header-banner h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 6px; }
+    .header-banner p { color: #bfdbfe; font-size: 1rem; }
+    .badge-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-blue { background: #dbeafe; color: #1e40af; }
+    .badge-green { background: #dcfce7; color: #166534; }
+    .badge-purple { background: #f3e8ff; color: #6b21a8; }
+    .badge-orange { background: #ffedd5; color: #9a3412; }
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    .btn-primary { background: var(--primary); color: white; border: none; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: white; color: var(--text-main); border: 1px solid var(--border); }
+    .btn-outline:hover { background: #f1f5f9; }
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .question-box {
+      background: #f8fafc;
+      border-left: 5px solid var(--primary);
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 22px;
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
+    .step-container {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px dashed var(--border);
+    }
+    .step-container:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .step-num {
+      background: var(--primary);
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .step-title { font-size: 1.15rem; font-weight: 600; color: #1e293b; }
+    .easy-note {
+      background: #fefce8;
+      border: 1px solid #fef08a;
+      border-left: 4px solid #eab308;
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+      font-size: 0.95rem;
+      color: #713f12;
+    }
+    .easy-note strong { color: #854d0e; }
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+      text-align: center;
+    }
+    thead th {
+      background: #f1f5f9;
+      color: #334155;
+      font-weight: 600;
+      padding: 11px 13px;
+      border-bottom: 2px solid var(--border);
+    }
+    tbody td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    tbody tr:nth-child(even) { background-color: #fafbfc; }
+    tbody tr:hover { background-color: #f1f5f9; }
+    tfoot tr {
+      background: #f8fafc;
+      font-weight: 700;
+      border-top: 2px solid var(--border);
+    }
+    tfoot td { padding: 11px 13px; }
+    .formula-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 14px 0;
+      font-size: 1.05rem;
+    }
+    .answer-box {
+      background: var(--success-light);
+      border: 2px solid #86efac;
+      border-radius: var(--radius);
+      padding: 18px 22px;
+      margin-top: 24px;
+    }
+    .answer-box h3 {
+      color: var(--success);
+      margin-bottom: 8px;
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .answer-box ul { list-style: none; padding-left: 0; }
+    .answer-box li {
+      padding: 5px 0;
+      font-size: 1.02rem;
+      font-weight: 600;
+      color: #166534;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .q-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-decoration: none;
+      color: inherit;
+    }
+    .q-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    .q-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .q-card-title { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+    .q-card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      flex-grow: 1;
+    }
+    .q-card-footer {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .theory-block {
+      margin-bottom: 22px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .theory-block h4 {
+      color: #1e40af;
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #dbeafe;
+      padding-bottom: 5px;
+    }
+    .merit-demerit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 640px) {
+      .merit-demerit-grid { grid-template-columns: 1fr; }
+    }
+    .merits-box {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .demerits-box {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      padding: 14px;
+      border-radius: 8px;
+    }
+    .merits-box h5 { color: #166534; margin-bottom: 6px; font-size: 0.95rem; }
+    .demerits-box h5 { color: #991b1b; margin-bottom: 6px; font-size: 0.95rem; }
+    .merits-box ul, .demerits-box ul { padding-left: 18px; font-size: 0.9rem; }
+    .merits-box li, .demerits-box li { margin-bottom: 5px; }
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      padding: 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      border-top: 1px solid var(--border);
+    }
+    @media print {
+      body { padding: 0; background: white; }
+      .btn, .nav-bar, footer { display: none !important; }
+      .card { box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+      .header-banner { background: #2563eb !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+<div class="header-banner">
+  <h1>Question 7 Solution</h1>
+  <p>Question 7: Mean Deviation about Mean and Median</p>
+  <div class="badge-row">
+    <span class="badge badge-orange">Dispersion</span>
+    <span class="badge badge-blue">Step-by-Step Easy Guide</span>
+    <span class="badge badge-green">Verified Accurate</span>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="question_6.html" class="btn btn-outline">⬅️ Question 6</a>
+  <div style="display:flex; gap:8px;">
+    <a href="index.html" class="btn btn-outline">📋 Index</a>
+    <a href="all_questions.html" class="btn btn-outline">📑 All Solutions (1 Page)</a>
+  </div>
+  <a href="question_8.html" class="btn btn-primary">Question 8 ➡️</a>
+</div>
+
+<div class="card">
+  <div class="card-title">📌 Question 7: Mean Deviation about Mean and Median</div>
+  <div class="question-box">
+    <strong>Problem Statement:</strong> Find the mean deviation about mean and mean deviation about median for the following data:<br>
+    <strong>Data values:</strong> $3, 9, 5, 3, 12, 10, 18, 4, 7, 19, 21$
+  </div>
+
+  <div class="easy-note">
+    💡 <strong>Easy Guide / आसान तरीका:</strong><br>
+    - Total items $n = 11$.<br>
+    - <strong>Part 1:</strong> Sum nikalo $\sum x = 111$, Mean = $\frac{111}{11} = 10.0909$. Fir har value ka $|x - \bar{x}|$ nikaal kar average lo.<br>
+    - <strong>Part 2:</strong> Values ko ascending order me arrange karo. Middle value (6th term) Median hogi = $9$. Fir $|x - 9|$ nikaal kar average lo.
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">1</span>
+      <span class="step-title">Part A: Mean Deviation about Mean</span>
+    </div>
+    <p>$$\sum x_i = 3 + 9 + 5 + 3 + 12 + 10 + 18 + 4 + 7 + 19 + 21 = 111$$</p>
+    <p>$$\bar{x} = \frac{111}{11} \approx 10.0909$$</p>
+    <p>Absolute deviations from Mean $|x_i - 10.0909|$:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>$|x_i - \bar{x}|$</th><th>$x_i$</th><th>$|x_i - \bar{x}|$</th></tr></thead>
+        <tbody>
+          <tr><td>3</td><td>7.0909</td><td>18</td><td>7.9091</td></tr>
+          <tr><td>9</td><td>1.0909</td><td>4</td><td>6.0909</td></tr>
+          <tr><td>5</td><td>5.0909</td><td>7</td><td>3.0909</td></tr>
+          <tr><td>3</td><td>7.0909</td><td>19</td><td>8.9091</td></tr>
+          <tr><td>12</td><td>1.9091</td><td>21</td><td>10.9091</td></tr>
+          <tr><td>10</td><td>0.0909</td><td><strong>Total</strong></td><td><strong>$\sum |x_i - \bar{x}| = 59.2727$</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula-box">
+      $$MD(\bar{x}) = \frac{\sum |x_i - \bar{x}|}{n} = \frac{59.2727}{11} \approx \mathbf{5.3884}$$
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step-container">
+    <div class="step-header">
+      <span class="step-num">2</span>
+      <span class="step-title">Part B: Mean Deviation about Median</span>
+    </div>
+    <p>Arranging data in ascending order: $$3, 3, 4, 5, 7, \mathbf{9}, 10, 12, 18, 19, 21$$</p>
+    <p>Since $n = 11$ (odd): $$\text{Median } (M) = \left(\frac{11+1}{2}\right)\text{-th term} = 6\text{-th term} = \mathbf{9}$$</p>
+    <p>Absolute deviations from Median $|x_i - 9|$:</p>
+    <div class="table-wrapper">
+      <table>
+        <thead><tr><th>$x_i$</th><th>$|x_i - 9|$</th><th>$x_i$</th><th>$|x_i - 9|$</th></tr></thead>
+        <tbody>
+          <tr><td>3</td><td>$|3 - 9| = 6$</td><td>10</td><td>$|10 - 9| = 1$</td></tr>
+          <tr><td>3</td><td>$|3 - 9| = 6$</td><td>12</td><td>$|12 - 9| = 3$</td></tr>
+          <tr><td>4</td><td>$|4 - 9| = 5$</td><td>18</td><td>$|18 - 9| = 9$</td></tr>
+          <tr><td>5</td><td>$|5 - 9| = 4$</td><td>19</td><td>$|19 - 9| = 10$</td></tr>
+          <tr><td>7</td><td>$|7 - 9| = 2$</td><td>21</td><td>$|21 - 9| = 12$</td></tr>
+          <tr><td>9</td><td>$|9 - 9| = 0$</td><td><strong>Total</strong></td><td><strong>$\sum |x_i - M| = 58$</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula-box">
+      $$MD(M) = \frac{\sum |x_i - M|}{n} = \frac{58}{11} \approx \mathbf{5.2727}$$
+    </div>
+  </div>
+
+  <div class="answer-box">
+    <h3>✅ Final Answer:</h3>
+    <ul>
+      <li>Mean = <strong>10.09</strong></li>
+      <li>Mean Deviation about Mean = <strong>5.39</strong></li>
+      <li>Median = <strong>9</strong></li>
+      <li>Mean Deviation about Median = <strong>5.27</strong> (or $\frac{58}{11}$)</li>
+    </ul>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <a href="question_6.html" class="btn btn-outline">⬅️ Question 6</a>
+  <div style="display:flex; gap:8px;">
+    <a href="index.html" class="btn btn-outline">📋 Index</a>
+    <a href="all_questions.html" class="btn btn-outline">📑 All Solutions (1 Page)</a>
+  </div>
+  <a href="question_8.html" class="btn btn-primary">Question 8 ➡️</a>
+</div>
+
+<footer>
+  <p>Statistics Assignment 1 Solutions &bull; Easy Step-by-Step Guide</p>
+</footer>
+</div>
+</body>
+</html>

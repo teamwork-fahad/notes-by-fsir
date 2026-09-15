@@ -14,5 +14,6 @@ Statistics deals with collecting, organizing, presenting, analyzing, and interpr
 - [3.4 Quartiles, Deciles, and Percentiles](/maths/unit-3/quartiles-deciles-percentiles/)
 - [3.5 Measures of Dispersion](/maths/unit-3/dispersion/)
 - [Exercise — Mean, Median and Mode](/maths/unit-3/exercise-mean-median-and-mode/)
+- [Assignment 1 — Questions & Solutions](/maths/unit-3/assignment-1/)
 
 Use these pages to study each topic separately, with definitions, formulas, and examples added as the syllabus grows.
