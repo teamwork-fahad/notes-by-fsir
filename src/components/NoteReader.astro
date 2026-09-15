@@ -1,5 +1,7 @@
 ---
 import "../styles/site.css";
+import AlgoliaVerification from "./AlgoliaVerification.astro";
+import AlgoliaSearchModal from "./AlgoliaSearchModal.astro";
 
 interface Props {
   post: any;
@@ -23,6 +25,7 @@ const author = post.data.author ?? "Fahad Sir";
     <meta name="viewport" content="width=device-width" />
     <title>{post.data.title} | Notes By FSir</title>
     <meta name="description" content={post.data.description ?? `${label} note by Fahad Sir`} />
+    <AlgoliaVerification />
   </head>
   <body>
     <header class="navbar">
@@ -146,5 +149,6 @@ const author = post.data.author ?? "Fahad Sir";
         onScrollTOC();
       }
     </script>
+    <AlgoliaSearchModal />
   </body>
 </html>

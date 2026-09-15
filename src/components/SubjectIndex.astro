@@ -1,6 +1,8 @@
 ---
 import "../styles/site.css";
 import { getChaptersBySubject, getChapterTitle } from "../lib/chapters";
+import AlgoliaVerification from "./AlgoliaVerification.astro";
+import AlgoliaSearchModal from "./AlgoliaSearchModal.astro";
 
 interface Props {
   notes: any[];
@@ -63,6 +65,7 @@ const chapters = Array.from(chaptersMap.entries()).sort(([titleA], [titleB]) => 
     <meta name="viewport" content="width=device-width" />
     <title>{title} | Notes By FSir</title>
     <meta name="description" content={description} />
+    <AlgoliaVerification />
   </head>
   <body>
     <header class="navbar">
@@ -150,5 +153,6 @@ const chapters = Array.from(chaptersMap.entries()).sort(([titleA], [titleB]) => 
       const savedView = localStorage.getItem("notes-view");
       if (savedView === "list") (document.querySelector('[data-view="list"]') as HTMLElement | null)?.click();
     </script>
+    <AlgoliaSearchModal />
   </body>
 </html>

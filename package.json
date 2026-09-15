@@ -10,12 +10,14 @@
     "dev:host": "astro dev --host",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "index-algolia": "node scripts/index-algolia.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/vercel": "^8.1.0",
     "@supabase/supabase-js": "^2.49.1",
+    "algoliasearch": "^5.59.0",
     "astro": "^7.2.1"
   },
   "devDependencies": {

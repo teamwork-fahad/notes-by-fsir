@@ -1,0 +1,501 @@
+---
+const appId = import.meta.env.PUBLIC_ALGOLIA_APP_ID || "";
+const searchApiKey = import.meta.env.PUBLIC_ALGOLIA_SEARCH_API_KEY || "";
+const indexName = import.meta.env.PUBLIC_ALGOLIA_INDEX_NAME || "notes_by_fsir";
+---
+
+<div id="algoliaSearchModal" class="algolia-modal-backdrop" aria-hidden="true" hidden>
+  <div class="algolia-modal-container" role="dialog" aria-modal="true" aria-label="Search notes">
+    <div class="algolia-modal-header">
+      <div class="algolia-search-input-wrapper">
+        <span class="algolia-search-icon">🔍</span>
+        <input
+          id="algoliaModalInput"
+          type="search"
+          placeholder="Search all notes, topics, C, Python, MySQL..."
+          autocomplete="off"
+          autofocus
+        />
+        <kbd class="algolia-esc-kbd">ESC</kbd>
+      </div>
+      <button id="algoliaCloseBtn" class="algolia-close-btn" aria-label="Close search">✕</button>
+    </div>
+
+    <div id="algoliaResultsContainer" class="algolia-results-body">
+      <div class="algolia-initial-state">
+        <p>⚡ Type to search notes by title, topic, or content...</p>
+        <div class="algolia-quick-links">
+          <span>Popular:</span>
+          <button type="button" class="algolia-chip" data-query="Python">Python</button>
+          <button type="button" class="algolia-chip" data-query="C++">C++</button>
+          <button type="button" class="algolia-chip" data-query="MySQL">MySQL</button>
+          <button type="button" class="algolia-chip" data-query="Functions">Functions</button>
+          <button type="button" class="algolia-chip" data-query="Arrays">Arrays</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="algolia-modal-footer">
+      <span>Search powered by <strong>Algolia</strong></span>
+      <span class="algolia-shortcuts-hint">
+        <kbd>↑</kbd> <kbd>↓</kbd> to navigate · <kbd>↵</kbd> to select · <kbd>ESC</kbd> to close
+      </span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .algolia-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: max(80px, 10vh);
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    animation: fadeIn 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .algolia-modal-container {
+    width: min(720px, calc(100vw - 32px));
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface, #fffdf8);
+    color: var(--ink, #17212b);
+    border: 1px solid var(--line, #ded8ce);
+    border-radius: 12px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+    overflow: hidden;
+  }
+
+  .algolia-modal-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line, #ded8ce);
+    gap: 12px;
+  }
+
+  .algolia-search-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .algolia-search-icon {
+    font-size: 1.1rem;
+    opacity: 0.7;
+  }
+
+  .algolia-search-input-wrapper input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--ink, #17212b);
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .algolia-esc-kbd {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--line, #ded8ce);
+    background: var(--paper, #f6f1e9);
+    color: var(--muted, #65717a);
+  }
+
+  .algolia-close-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted, #65717a);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 150ms ease;
+  }
+
+  .algolia-close-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+
+  .algolia-results-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    min-height: 200px;
+    max-height: 520px;
+  }
+
+  .algolia-initial-state {
+    padding: 24px 16px;
+    text-align: center;
+    color: var(--muted, #65717a);
+  }
+
+  .algolia-quick-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .algolia-chip {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line, #ded8ce);
+    background: var(--paper, #f6f1e9);
+    color: var(--teal, #176d6b);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 120ms ease, border-color 120ms ease;
+  }
+
+  .algolia-chip:hover {
+    border-color: var(--coral, #e86d52);
+    transform: translateY(-1px);
+  }
+
+  .algolia-result-item {
+    display: block;
+    padding: 14px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid transparent;
+    transition: background 120ms ease, border-color 120ms ease;
+    margin-bottom: 6px;
+  }
+
+  .algolia-result-item:hover,
+  .algolia-result-item.selected {
+    background: rgba(23, 109, 107, 0.06);
+    border-color: rgba(23, 109, 107, 0.25);
+  }
+
+  .algolia-result-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .algolia-badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--coral, #e86d52);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .algolia-result-title {
+    font-family: "Space Grotesk", sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--ink, #17212b);
+    margin: 0;
+  }
+
+  .algolia-result-chapter {
+    font-size: 0.8rem;
+    color: var(--muted, #65717a);
+    margin-left: auto;
+  }
+
+  .algolia-result-snippet {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--muted, #65717a);
+    line-height: 1.5;
+  }
+
+  .algolia-result-snippet mark,
+  .algolia-result-title mark {
+    background: rgba(242, 201, 76, 0.35);
+    color: inherit;
+    font-weight: 600;
+    padding: 0 2px;
+    border-radius: 2px;
+  }
+
+  .algolia-no-results {
+    padding: 32px 16px;
+    text-align: center;
+    color: var(--muted, #65717a);
+  }
+
+  .algolia-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    border-top: 1px solid var(--line, #ded8ce);
+    background: var(--paper, #f6f1e9);
+    font-size: 0.78rem;
+    color: var(--muted, #65717a);
+  }
+
+  .algolia-shortcuts-hint kbd {
+    padding: 2px 4px;
+    border-radius: 3px;
+    border: 1px solid var(--line, #ded8ce);
+    background: var(--surface, #fffdf8);
+    font-size: 0.7rem;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 640px) {
+    .algolia-modal-backdrop {
+      padding-top: 16px;
+    }
+    .algolia-shortcuts-hint {
+      display: none;
+    }
+  }
+</style>
+
+<script is:inline define:vars={{ appId, searchApiKey, indexName }}>
+  (function () {
+    const modal = document.getElementById("algoliaSearchModal");
+    const input = document.getElementById("algoliaModalInput");
+    const closeBtn = document.getElementById("algoliaCloseBtn");
+    const container = document.getElementById("algoliaResultsContainer");
+
+    if (!modal || !input || !container) return;
+
+    let selectedIdx = -1;
+
+    function openModal(initialQuery = "") {
+      modal.hidden = false;
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      input.value = initialQuery;
+      input.focus();
+      if (initialQuery.trim()) {
+        performSearch(initialQuery);
+      }
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+      modal.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      selectedIdx = -1;
+    }
+
+    closeBtn?.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (modal.hidden) openModal(); else closeModal();
+      } else if (e.key === "Escape" && !modal.hidden) {
+        closeModal();
+      }
+    });
+
+    // Wire existing search boxes on page
+    document.querySelectorAll("#homeSearch, #noteSearch, [data-algolia-trigger]").forEach((el) => {
+      el.addEventListener("focus", (e) => {
+        e.preventDefault();
+        openModal((el).value || "");
+      });
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        openModal((el).value || "");
+      });
+    });
+
+    // Quick filter chips
+    document.querySelectorAll(".algolia-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const q = chip.getAttribute("data-query") || "";
+        input.value = q;
+        input.focus();
+        performSearch(q);
+      });
+    });
+
+    let debounceTimer = null;
+    input.addEventListener("input", () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        performSearch(input.value.trim());
+      }, 180);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const items = container.querySelectorAll(".algolia-result-item");
+      if (!items.length) return;
+
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        selectedIdx = Math.min(selectedIdx + 1, items.length - 1);
+        updateSelection(items);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        selectedIdx = Math.max(selectedIdx - 1, 0);
+        updateSelection(items);
+      } else if (e.key === "Enter" && selectedIdx >= 0) {
+        e.preventDefault();
+        (items[selectedIdx]).click();
+      }
+    });
+
+    function updateSelection(items) {
+      items.forEach((item, idx) => {
+        if (idx === selectedIdx) {
+          item.classList.add("selected");
+          item.scrollIntoView({ block: "nearest" });
+        } else {
+          item.classList.remove("selected");
+        }
+      });
+    }
+
+    async function performSearch(query) {
+      if (!query) {
+        container.innerHTML = `
+          <div class="algolia-initial-state">
+            <p>⚡ Type to search notes by title, topic, or content...</p>
+            <div class="algolia-quick-links">
+              <span>Popular:</span>
+              <button type="button" class="algolia-chip" data-query="Python">Python</button>
+              <button type="button" class="algolia-chip" data-query="C++">C++</button>
+              <button type="button" class="algolia-chip" data-query="MySQL">MySQL</button>
+              <button type="button" class="algolia-chip" data-query="Functions">Functions</button>
+              <button type="button" class="algolia-chip" data-query="Arrays">Arrays</button>
+            </div>
+          </div>
+        `;
+        document.querySelectorAll(".algolia-chip").forEach((chip) => {
+          chip.addEventListener("click", () => {
+            const q = chip.getAttribute("data-query") || "";
+            input.value = q;
+            input.focus();
+            performSearch(q);
+          });
+        });
+        return;
+      }
+
+      if (!appId || !searchApiKey) {
+        container.innerHTML = `
+          <div class="algolia-no-results">
+            <p>ℹ️ Algolia credentials not configured yet.</p>
+            <small>Set <code>PUBLIC_ALGOLIA_APP_ID</code> & <code>PUBLIC_ALGOLIA_SEARCH_API_KEY</code> in Vercel / .env.local</small>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `<div class="algolia-initial-state"><p>Searching Algolia...</p></div>`;
+
+      try {
+        const response = await fetch(`https://${appId}-dsn.algolia.net/1/indexes/${indexName}/query`, {
+          method: "POST",
+          headers: {
+            "X-Algolia-Application-Id": appId,
+            "X-Algolia-API-Key": searchApiKey,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            query: query,
+            hitsPerPage: 10,
+            attributesToHighlight: ["title", "description", "content", "subject"],
+            attributesToSnippet: ["content:25"]
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`Algolia response status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const hits = data.hits || [];
+
+        if (hits.length === 0) {
+          container.innerHTML = `
+            <div class="algolia-no-results">
+              <p>🔍 No notes found matching <strong>"${escapeHtml(query)}"</strong></p>
+              <small>Try checking for typos or searching for general topics like "variables", "loops", or "arrays".</small>
+            </div>
+          `;
+          return;
+        }
+
+        selectedIdx = -1;
+        let html = "";
+        hits.forEach((hit) => {
+          const title = getHighlighted(hit, "title") || hit.title || hit.noteTitle || "Note";
+          const snippet = getHighlighted(hit, "content") || hit.description || "";
+          const subject = hit.subject || hit.subjectSlug || "Note";
+          const chapter = hit.chapter || "General";
+          const url = hit.url || `/${hit.subjectSlug}/${hit.slug}`;
+
+          html += `
+            <a href="${url}" class="algolia-result-item">
+              <div class="algolia-result-header">
+                <span class="algolia-badge">${escapeHtml(subject)}</span>
+                <h4 class="algolia-result-title">${title}</h4>
+                <span class="algolia-result-chapter">${escapeHtml(chapter)}</span>
+              </div>
+              <p class="algolia-result-snippet">${snippet}</p>
+            </a>
+          `;
+        });
+
+        container.innerHTML = html;
+      } catch (err) {
+        console.error("Algolia Search Error:", err);
+        container.innerHTML = `
+          <div class="algolia-no-results">
+            <p>⚠️ Unable to fetch search results from Algolia.</p>
+            <small>${escapeHtml(err.message)}</small>
+          </div>
+        `;
+      }
+    }
+
+    function getHighlighted(hit, field) {
+      if (hit._highlightResult && hit._highlightResult[field] && hit._highlightResult[field].value) {
+        return hit._highlightResult[field].value;
+      }
+      if (hit._snippetResult && hit._snippetResult[field] && hit._snippetResult[field].value) {
+        return hit._snippetResult[field].value;
+      }
+      return null;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return "";
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  })();
+</script>

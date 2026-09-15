@@ -1,6 +1,8 @@
 ---
 import { getCollection } from "astro:content";
 import { getActiveSubjects } from "../lib/subjects";
+import AlgoliaVerification from "../components/AlgoliaVerification.astro";
+import AlgoliaSearchModal from "../components/AlgoliaSearchModal.astro";
 
 const subjectMetas = getActiveSubjects();
 
@@ -34,6 +36,7 @@ const subjects = (
 			content="Notes By FSir - Coding notes, programming tutorials, examples and practicals by Fahad Sir."
 		/>
 		<title>Notes By FSir | Coding Notes & Tutorials</title>
+		<AlgoliaVerification />
 	</head>
 
 	<body>
@@ -661,5 +664,6 @@ const subjects = (
 				});
 			});
 		</script>
+		<AlgoliaSearchModal />
 	</body>
 </html>

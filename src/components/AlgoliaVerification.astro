@@ -1,0 +1,7 @@
+---
+const verificationCode = import.meta.env.PUBLIC_ALGOLIA_SITE_VERIFICATION || "";
+---
+
+{verificationCode && (
+  <meta name="algolia-site-verification" content={verificationCode} />
+)}
