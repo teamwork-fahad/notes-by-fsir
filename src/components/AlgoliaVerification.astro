@@ -1,5 +1,5 @@
 ---
-const verificationCode = import.meta.env.PUBLIC_ALGOLIA_SITE_VERIFICATION || "";
+const verificationCode = import.meta.env.PUBLIC_ALGOLIA_SITE_VERIFICATION || import.meta.env.ALGOLIA_SITE_VERIFICATION || "";
 ---
 
 {verificationCode && (

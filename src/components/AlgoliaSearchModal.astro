@@ -1,7 +1,7 @@
 ---
-const appId = import.meta.env.PUBLIC_ALGOLIA_APP_ID || "";
-const searchApiKey = import.meta.env.PUBLIC_ALGOLIA_SEARCH_API_KEY || "";
-const indexName = import.meta.env.PUBLIC_ALGOLIA_INDEX_NAME || "notes_by_fsir";
+const appId = import.meta.env.PUBLIC_ALGOLIA_APP_ID || import.meta.env.ALGOLIA_APP_ID || "";
+const searchApiKey = import.meta.env.PUBLIC_ALGOLIA_SEARCH_API_KEY || import.meta.env.ALGOLIA_SEARCH_API_KEY || "";
+const indexName = import.meta.env.PUBLIC_ALGOLIA_INDEX_NAME || import.meta.env.ALGOLIA_INDEX_NAME || "notes_by_fsir";
 ---
 
 <div id="algoliaSearchModal" class="algolia-modal-backdrop" aria-hidden="true" hidden>
